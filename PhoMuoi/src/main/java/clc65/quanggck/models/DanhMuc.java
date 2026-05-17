@@ -1,14 +1,9 @@
 package clc65.quanggck.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "danh_muc")
@@ -27,4 +22,9 @@ public class DanhMuc {
 
     @Column(name = "mo_ta", length = 255)
     private String moTa;
+
+    // 1 danh mục có nhiều món ăn
+    @OneToMany(mappedBy = "danhMuc", cascade = CascadeType.ALL)
+    @JsonIgnore // Ngăn không cho in ngược lại danh sách món ăn gây vòng lặp vô hạn
+    private List<MonAn> dsMonAn;
 }

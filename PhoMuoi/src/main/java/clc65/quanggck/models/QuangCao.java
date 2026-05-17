@@ -28,9 +28,7 @@ public class QuangCao {
     @Column(name = "image", length = 255)
     private String image; //
 
-    // Nếu ở trên phpMyAdmin bạn đã đổi kiểu dữ liệu cột này thành TEXT theo góp ý trước đó, 
-    // bạn có thể thêm thuộc tính: columnDefinition = "TEXT" vào bên trong @Column nhé.
-    // Ở đây mình đang để mặc định theo chuẩn ảnh bạn chụp ban đầu.
+
     @Column(name = "content", length = 255)
     private String content; //
 
