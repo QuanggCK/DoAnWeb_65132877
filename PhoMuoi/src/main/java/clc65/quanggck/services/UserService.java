@@ -19,7 +19,6 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    // Đăng ký tài khoản mới
     public User register(User user) {
         if (userRepository.findBySdt(user.getSdt()) != null) {
             throw new RuntimeException("Số điện thoại này đã được đăng ký!");
