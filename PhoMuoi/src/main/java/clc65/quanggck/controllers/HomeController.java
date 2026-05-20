@@ -2,13 +2,14 @@ package clc65.quanggck.controllers;
 
 import clc65.quanggck.models.*;
 import clc65.quanggck.services.*;
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpSession; // Dùng để lưu trạng thái đăng nhập của User
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/home")
-@CrossOrigin("*") 
+@Controller // CHUYỂN TỪ @RestController THÀNH @Controller ĐỂ ĐIỀU HƯỚNG HTML
+@RequestMapping("/") // Đổi gốc dẫn về trang chủ
 public class HomeController {
 
     private final MonAnService monAnService;
@@ -16,7 +17,6 @@ public class HomeController {
     private final QuangCaoService quangCaoService;
     private final UserService userService;
     private final DonHangService donHangService;
-
 
     public HomeController(MonAnService monAnService, DanhMucService danhMucService, 
                           QuangCaoService quangCaoService, UserService userService, 
@@ -28,60 +28,100 @@ public class HomeController {
         this.donHangService = donHangService;
     }
 
-    // 1. Lấy danh sách danh mục món ăn
-    @GetMapping("/danh-muc")
-    public ResponseEntity<List<DanhMuc>> getAllDanhMuc() {
-        return ResponseEntity.ok(danhMucService.getAllDanhMuc());
+    // 1. TRANG CHỦ: Gom toàn bộ dữ liệu Danh mục, Món ăn, Quảng cáo đổ lên 1 trang index.html
+    @GetMapping("/")
+    public String trangChu(Model model) {
+        // Gửi danh sách danh mục (cho Header dropdown và danh sách bộ lọc)
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
+        
+        // Gửi danh sách món ăn đang bán hiển thị ở trang chủ
+        model.addAttribute("dsMonAn", monAnService.getMonAnDangBan());
+        
+        // Gửi danh sách banner quảng cáo chạy slide
+        model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
+        
+        return "index"; // Mở file src/main/resources/templates/index.html
     }
 
-    // 2. Lấy danh sách món ăn đang được mở bán
-    @GetMapping("/mon-an")
-    public ResponseEntity<List<MonAn>> getMonAnDangBan() {
-        return ResponseEntity.ok(monAnService.getMonAnDangBan());
+    // 2. GIAO DIỆN ĐĂNG KÝ
+    @GetMapping("/register")
+    public String showRegisterForm(Model model) {
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
+        model.addAttribute("user", new User());
+        return "register"; // Mở file register.html
     }
 
-    // 3. Lấy danh sách banner quảng cáo đang hoạt động
-    @GetMapping("/quang-cao")
-    public ResponseEntity<List<QuangCao>> getQuangCaoDangBat() {
-        return ResponseEntity.ok(quangCaoService.getQuangCaoDangBat());
-    }
-
-    // 4. API Đăng ký tài khoản khách hàng
+    // XỬ LÝ ĐĂNG KÝ
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public String register(@ModelAttribute("user") User user, Model model) {
         try {
-            User newUser = userService.register(user);
-            return ResponseEntity.ok(newUser);
+            userService.register(user);
+            return "redirect:/login?success"; // Đăng ký xong chuyển sang trang đăng nhập
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
+            model.addAttribute("error", e.getMessage());
+            return "register"; // Lỗi thì ở lại trang đăng ký và báo lỗi
         }
     }
 
-    // 5. API Đăng nhập
+    // 3. GIAO DIỆN ĐĂNG NHẬP
+    @GetMapping("/login")
+    public String showLoginForm(Model model) {
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
+        return "login"; // Mở file login.html
+    }
+
+    // XỬ LÝ ĐĂNG NHẬP
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String sdt, @RequestParam String matKhau) {
+    public String login(@RequestParam String sdt, @RequestParam String matKhau, HttpSession session, Model model) {
         try {
             User user = userService.login(sdt, matKhau);
-            return ResponseEntity.ok(user);
+            session.setAttribute("userLogin", user); // Lưu thông tin đăng nhập vào Session để dùng ở các trang khác
+            return "redirect:/"; // Đăng nhập đúng điều hướng về trang chủ
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
+            model.addAttribute("error", e.getMessage());
+            return "login"; // Sai mật khẩu/SĐT quay lại trang login báo lỗi
         }
     }
 
-    // 6. API Khách hàng gửi đơn đặt hàng (Check out)
+    // ĐĂNG XUẤT
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.removeAttribute("userLogin"); // Xóa session người dùng
+        return "redirect:/";
+    }
+
+    // 4. XỬ LÝ ĐẶT HÀNG (CHECK OUT) FROM GIỎ HÀNG THYMELEAF
     @PostMapping("/dat-hang")
-    public ResponseEntity<?> createDonHang(@RequestBody DonHang donHang) {
+    public String createDonHang(@ModelAttribute DonHang donHang, HttpSession session, Model model) {
+        User userLogin = (User) session.getAttribute("userLogin");
+        if (userLogin == null) {
+            return "redirect:/login"; // Chưa đăng nhập bắt buộc đi đăng nhập
+        }
         try {
-            DonHang newOrder = donHangService.createDonHang(donHang);
-            return ResponseEntity.ok(newOrder);
+            donHang.setUser(userLogin); // Gán user đang đăng nhập vào đơn hàng
+            donHangService.createDonHang(donHang);
+            return "redirect:/lich-su-don-hang"; // Đặt thành công chuyển đến trang lịch sử
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Đặt hàng thất bại: " + e.getMessage());
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/gio-hang?error";
         }
     }
 
-    // 7. Xem lịch sử đơn hàng của 1 khách hàng
-    @GetMapping("/lich-su-don-hang/{userId}")
-    public ResponseEntity<List<DonHang>> getLichSuDonHang(@PathVariable Integer userId) {
-        return ResponseEntity.ok(donHangService.getLichSuDonHang(userId));
+    // 5. XEM LỊCH SỬ ĐƠN HÀNG CỦA KHÁCH HÀNG ĐANG ĐĂNG NHẬP
+    @GetMapping("/lich-su-don-hang")
+    public String getLichSuDonHang(HttpSession session, Model model) {
+        User userLogin = (User) session.getAttribute("userLogin");
+        if (userLogin == null) {
+            return "redirect:/login";
+        }
+        
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
+        // Lấy lịch sử đơn theo ID người dùng đang đăng nhập trong Session
+        List<DonHang> lichSu = donHangService.getLichSuDonHang(userLogin.getUserId());
+        model.addAttribute("dsDonHang", lichSu);
+        
+        return "lich-su"; // Mở file lich-su.html
     }
 }

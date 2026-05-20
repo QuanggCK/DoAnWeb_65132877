@@ -5,7 +5,7 @@ import clc65.quanggck.models.CtDonHang;
 import clc65.quanggck.repos.DonHangRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime; // Khớp với kiểu dữ liệu trong Model của bạn
+import java.time.LocalDateTime; 
 import java.util.List;
 
 @Service
@@ -22,7 +22,7 @@ public class DonHangService {
     }
 
     public List<DonHang> getLichSuDonHang(Integer userId) {
-        return donHangRepository.findByUserIdOrderByIdDesc(userId);
+        return donHangRepository.findByUser_UserIdOrderByOrderIdDesc(userId);
     }
 
     public DonHang updateTrangThai(Integer orderId, String trangThaiMoi) {
@@ -34,7 +34,7 @@ public class DonHangService {
 
     @Transactional
     public DonHang createDonHang(DonHang donHang) {
-        donHang.setNgayDat(LocalDateTime.now()); // Khớp chuẩn LocalDateTime
+        donHang.setNgayDat(LocalDateTime.now()); 
         donHang.setTrangThai("Chờ xác nhận");
 
         if (donHang.getDsChiTietDonHang() != null) {

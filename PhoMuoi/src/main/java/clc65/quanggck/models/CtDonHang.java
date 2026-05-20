@@ -18,7 +18,7 @@ public class CtDonHang {
     private DonHang donHang;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "product_id")
+    @JoinColumn(name = "product_id")
     private MonAn monAn;
 
     @Column(name = "quantity")

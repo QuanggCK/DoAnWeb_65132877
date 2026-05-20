@@ -8,5 +8,5 @@ import java.util.List;
 @Repository
 public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
     
-    List<DonHang> findByUserIdOrderByIdDesc(Integer userId);
+	List<DonHang> findByUser_UserIdOrderByOrderIdDesc(Integer userId);
 }
