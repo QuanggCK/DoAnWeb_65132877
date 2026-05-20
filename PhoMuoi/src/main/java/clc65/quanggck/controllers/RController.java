@@ -18,7 +18,6 @@ public class RController {
     private final MonAnService monAnService;
     private final DonHangService donHangService;
 
-
     public RController(UserService userService, MonAnService monAnService, DonHangService donHangService) {
         this.userService = userService;
         this.monAnService = monAnService;
@@ -29,7 +28,7 @@ public class RController {
     public ResponseEntity<Map<String, Object>> checkSystemStatus() {
         Map<String, Object> statusReport = new HashMap<>();
         
-
+        try { 
             int totalUsers = userService.getAllUsers().size();
             int totalDishes = monAnService.getAllMonAn().size();
             int totalOrders = donHangService.getAllDonHang().size();
@@ -41,10 +40,10 @@ public class RController {
             statusReport.put("so_luong_don_hang", totalOrders);
             
             return ResponseEntity.ok(statusReport);
-        } catch (Exception e) {
+        } catch (Exception e) { 
             statusReport.put("he_thong", "LỖI KẾT NỐI");
             statusReport.put("chi_tiet_loi", e.getMessage());
             return ResponseEntity.status(500).body(statusReport);
         }
-    }
-}
+    } 
+} 
