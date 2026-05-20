@@ -10,7 +10,6 @@ public class MonAnService {
 
     private final MonAnRepository monAnRepository;
 
-    // Khởi tạo constructor thủ công để nhúng Repository
     public MonAnService(MonAnRepository monAnRepository) {
         this.monAnRepository = monAnRepository;
     }

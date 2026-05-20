@@ -10,7 +10,6 @@ public class QuangCaoService {
 
     private final QuangCaoRepository quangCaoRepository;
 
-    // Khởi tạo constructor thủ công để nhúng Repository
     public QuangCaoService(QuangCaoRepository quangCaoRepository) {
         this.quangCaoRepository = quangCaoRepository;
     }
