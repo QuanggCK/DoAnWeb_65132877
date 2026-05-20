@@ -10,7 +10,6 @@ public class DanhMucService {
 
     private final DanhMucRepository danhMucRepository;
 
-    // Khởi tạo constructor thủ công để nhúng Repository
     public DanhMucService(DanhMucRepository danhMucRepository) {
         this.danhMucRepository = danhMucRepository;
     }
