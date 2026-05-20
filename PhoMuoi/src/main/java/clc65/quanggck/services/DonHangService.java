@@ -1,0 +1,48 @@
+package clc65.quanggck.services;
+
+import clc65.quanggck.models.DonHang;
+import clc65.quanggck.models.CtDonHang;
+import clc65.quanggck.repos.DonHangRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime; // Khớp với kiểu dữ liệu trong Model của bạn
+import java.util.List;
+
+@Service
+public class DonHangService {
+
+    private final DonHangRepository donHangRepository;
+
+    public DonHangService(DonHangRepository donHangRepository) {
+        this.donHangRepository = donHangRepository;
+    }
+
+    public List<DonHang> getAllDonHang() {
+        return donHangRepository.findAll();
+    }
+
+    public List<DonHang> getLichSuDonHang(Integer userId) {
+        return donHangRepository.findByUserIdOrderByIdDesc(userId);
+    }
+
+    public DonHang updateTrangThai(Integer orderId, String trangThaiMoi) {
+        DonHang donHang = donHangRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+        donHang.setTrangThai(trangThaiMoi);
+        return donHangRepository.save(donHang);
+    }
+
+    @Transactional
+    public DonHang createDonHang(DonHang donHang) {
+        donHang.setNgayDat(LocalDateTime.now()); // Khớp chuẩn LocalDateTime
+        donHang.setTrangThai("Chờ xác nhận");
+
+        if (donHang.getDsChiTietDonHang() != null) {
+            for (CtDonHang ct : donHang.getDsChiTietDonHang()) {
+                ct.setDonHang(donHang);
+            }
+        }
+
+        return donHangRepository.save(donHang);
+    }
+}
