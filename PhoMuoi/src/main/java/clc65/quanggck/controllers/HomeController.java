@@ -8,8 +8,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@Controller // CHUYỂN TỪ @RestController THÀNH @Controller ĐỂ ĐIỀU HƯỚNG HTML
-@RequestMapping("/") // Đổi gốc dẫn về trang chủ
+@Controller 
+@RequestMapping("/") 
 public class HomeController {
 
     private final MonAnService monAnService;
@@ -28,22 +28,16 @@ public class HomeController {
         this.donHangService = donHangService;
     }
 
-    // 1. TRANG CHỦ: Gom toàn bộ dữ liệu Danh mục, Món ăn, Quảng cáo đổ lên 1 trang index.html
-    @GetMapping("/")
+    @GetMapping({"/", "/index"})
     public String trangChu(Model model) {
-        // Gửi danh sách danh mục (cho Header dropdown và danh sách bộ lọc)
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
-        
-        // Gửi danh sách món ăn đang bán hiển thị ở trang chủ
         model.addAttribute("dsMonAn", monAnService.getMonAnDangBan());
-        
-        // Gửi danh sách banner quảng cáo chạy slide
         model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
         
-        return "index"; // Mở file src/main/resources/templates/index.html
+        return "index"; 
     }
 
-    // 2. GIAO DIỆN ĐĂNG KÝ
+
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
@@ -56,11 +50,11 @@ public class HomeController {
     public String register(@ModelAttribute("user") User user, Model model) {
         try {
             userService.register(user);
-            return "redirect:/login?success"; // Đăng ký xong chuyển sang trang đăng nhập
+            return "redirect:/login?success"; 
         } catch (Exception e) {
             model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
             model.addAttribute("error", e.getMessage());
-            return "register"; // Lỗi thì ở lại trang đăng ký và báo lỗi
+            return "register"; 
         }
     }
 
@@ -76,7 +70,7 @@ public class HomeController {
     public String login(@RequestParam String sdt, @RequestParam String matKhau, HttpSession session, Model model) {
         try {
             User user = userService.login(sdt, matKhau);
-            session.setAttribute("userLogin", user); // Lưu thông tin đăng nhập vào Session để dùng ở các trang khác
+            session.setAttribute("userLogin", user); // Lưu thông tin đăng nhập vào Session
             return "redirect:/"; // Đăng nhập đúng điều hướng về trang chủ
         } catch (Exception e) {
             model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
@@ -109,7 +103,7 @@ public class HomeController {
         }
     }
 
-    // 5. XEM LỊCH SỬ ĐƠN HÀNG CỦA KHÁCH HÀNG ĐANG ĐĂNG NHẬP
+    // 5. XEM LỊCH SỬ ĐƠN HÀNG CỦA KHÁCH HÀNG ĐNG ĐĂNG NHẬP
     @GetMapping("/lich-su-don-hang")
     public String getLichSuDonHang(HttpSession session, Model model) {
         User userLogin = (User) session.getAttribute("userLogin");
