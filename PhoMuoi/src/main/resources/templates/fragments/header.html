@@ -4,30 +4,43 @@
     <meta charset="UTF-8">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        /* Ẩn mũi tên mặc định của dropdown Bootstrap để dùng icon tự do cho đẹp */
+        .no-caret::after {
+            display: none !important;
+        }
+        /* Hiệu ứng mờ đi một chút khi đưa chuột vào các nút cho sinh động */
+        .nav-hover:hover {
+            opacity: 0.8;
+            transition: 0.2s;
+        }
+    </style>
 </head>
 <body>
 
-    <nav th:fragment="header" class="navbar navbar-expand-lg navbar-dark py-2" style="background-color: #121ba6;">
+    <nav th:fragment="header" class="navbar navbar-expand-lg py-2 shadow-sm" style="background-color: #121ba6;">
         <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
             
-            <a class="navbar-brand text-white fw-bold fs-4 pe-3" th:href="@{/}">PhoMuoi</a>
+            <a class="navbar-brand text-white fw-bold fs-4 pe-3 nav-hover" th:href="@{/}">PhoMuoi</a>
 
             <form class="d-flex mx-auto align-items-center" style="flex: 1; max-width: 550px;" th:action="@{/search}" method="GET">
                 <input class="form-control border-0 px-4 py-2 w-100 text-dark" 
                        type="search" 
                        name="keyword"
                        placeholder="Tìm kiếm món ăn..." 
-                       style="background-color: #d9d9d9; border-radius: 50px; font-size: 0.95rem; height: 42px;">
+                       style="background-color: #e9ecef; border-radius: 50px; font-size: 0.95rem; height: 42px;">
             </form>
 
-            <div class="d-flex align-items-center gap-4 ps-3">
+            <div class="d-flex align-items-center gap-4 ps-4">
                 
                 <div class="dropdown">
-                    <a class="text-white text-decoration-none dropdown-toggle fs-5 bg-transparent border-0" 
+                    <a class="text-white text-decoration-none dropdown-toggle no-caret fs-6 d-flex align-items-center gap-1 nav-hover" 
                        href="#" role="button" id="dropdownMenuDanhMuc" data-bs-toggle="dropdown" aria-expanded="false">
                         Danh mục
+                        <i class="bi bi-caret-down-fill" style="font-size: 0.8rem;"></i> 
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="dropdownMenuDanhMuc">
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" aria-labelledby="dropdownMenuDanhMuc" style="border-radius: 10px;">
                         <li th:each="dm : ${dsDanhMuc}">
                             <a class="dropdown-item py-2" 
                                th:href="@{/danh-muc/{id}(id=${dm.id})}" 
@@ -39,11 +52,11 @@
                     </ul>
                 </div>
 
-                <a th:href="@{/login}" class="text-white d-flex align-items-center justify-content-center text-decoration-none">
-                    <i class="bi bi-person-circle" style="font-size: 2rem; line-height: 1;"></i>
+                <a th:href="@{/login}" class="text-white d-flex align-items-center justify-content-center text-decoration-none nav-hover">
+                    <i class="bi bi-person" style="font-size: 2rem; line-height: 1; -webkit-text-stroke: 1px;"></i>
                 </a>
 
-                <a th:href="@{/gio-hang}" class="btn border-0 d-flex align-items-center px-4 fw-normal text-dark shadow-sm" 
+                <a th:href="@{/gio-hang}" class="btn border-0 d-flex align-items-center px-4 fw-medium text-dark shadow-sm nav-hover" 
                    style="background-color: #d9d9d9; border-radius: 50px; height: 42px; gap: 8px; font-size: 0.95rem;">
                     <i class="bi bi-cart3 fs-5"></i>
                     <span>Giỏ hàng</span>
