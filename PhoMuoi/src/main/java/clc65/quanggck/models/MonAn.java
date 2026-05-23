@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "mon_an")
 public class MonAn {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -18,6 +19,9 @@ public class MonAn {
 
     @Column(name = "hinh_anh", length = 255)
     private String hinhAnh;
+
+    @Column(name = "nguyen_lieu", length = 255)
+    private String nguyenLieu;
 
     @Column(name = "trang_thai")
     private Boolean trangThai = true; // true: đang bán, false: ngừng bán
@@ -40,6 +44,10 @@ public class MonAn {
 
     public String getHinhAnh() { return hinhAnh; }
     public void setHinhAnh(String hinhAnh) { this.hinhAnh = hinhAnh; }
+
+    // GETTER / SETTER CHO NGUYÊN LIỆU
+    public String getNguyenLieu() { return nguyenLieu; }
+    public void setNguyenLieu(String nguyenLieu) { this.nguyenLieu = nguyenLieu; }
 
     public Boolean getTrangThai() { return trangThai; }
     public void setTrangThai(Boolean trangThai) { this.trangThai = trangThai; }
