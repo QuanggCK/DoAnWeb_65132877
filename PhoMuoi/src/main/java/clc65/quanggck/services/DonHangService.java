@@ -45,4 +45,28 @@ public class DonHangService {
 
         return donHangRepository.save(donHang);
     }
+
+
+    public int getCartSizeByUserId(Integer userId) {
+        List<DonHang> danhSachDonHang = donHangRepository.findByUser_UserIdOrderByOrderIdDesc(userId);
+        
+        if (danhSachDonHang == null || danhSachDonHang.isEmpty()) {
+            return 0;
+        }
+
+        int totalSize = 0;
+        for (DonHang donHang : danhSachDonHang) {
+            if ("Giỏ hàng".equalsIgnoreCase(donHang.getTrangThai()) || "Chờ xác nhận".equalsIgnoreCase(donHang.getTrangThai())) {
+                
+                if (donHang.getDsChiTietDonHang() != null) {
+                    for (CtDonHang ct : donHang.getDsChiTietDonHang()) {
+                        if (ct != null && ct.getQuantity() != null) {
+                            totalSize += ct.getQuantity(); 
+                        }
+                    }
+                }
+            }
+        }
+        return totalSize;
+    }
 }

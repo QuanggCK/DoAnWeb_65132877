@@ -28,16 +28,28 @@ public class HomeController {
         this.donHangService = donHangService;
     }
 
+    // 1. TRANG CHỦ / INDEX
     @GetMapping({"/", "/index"})
-    public String trangChu(Model model) {
+    public String trangChu(HttpSession session, Model model) {
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
         model.addAttribute("dsMonAn", monAnService.getMonAnDangBan());
         model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
         
+        // --- ĐỒNG BỘ LOGIC KIỂM TRA ĐĂNG NHẬP & GIỎ HÀNG CHO HEADER ---
+        User userLogin = (User) session.getAttribute("userLogin");
+        if (userLogin != null) {
+            // Đếm số lượng món trong giỏ hàng thực tế từ cơ sở dữ liệu của User này
+            int cartSize = donHangService.getCartSizeByUserId(userLogin.getUserId()); 
+            session.setAttribute("cartSize", cartSize);
+        } else {
+            // Nếu chưa đăng nhập thì mặc định giỏ hàng bằng 0
+            session.setAttribute("cartSize", 0);
+        }
+        
         return "index"; 
     }
 
-
+    // 2. GIAO DIỆN ĐĂNG KÝ
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
@@ -67,10 +79,17 @@ public class HomeController {
 
     // XỬ LÝ ĐĂNG NHẬP
     @PostMapping("/login")
-    public String login(@RequestParam String sdt, @RequestParam String matKhau, HttpSession session, Model model) {
+    public String login(@RequestParam("sdt") String sdt, 
+                        @RequestParam("mat_khau") String matKhau, 
+                        HttpSession session, Model model) {
         try {
+            // Gọi tầng service xử lý kiểm tra SĐT và mật khẩu
             User user = userService.login(sdt, matKhau);
-            session.setAttribute("userLogin", user); // Lưu thông tin đăng nhập vào Session
+            
+            // ĐỒNG BỘ SESSION:
+            session.setAttribute("user", user);       // Để Header nhận biết: ${session.user != null}
+            session.setAttribute("userLogin", user);  // Giữ nguyên cho các tầng logic cũ của bạn
+            
             return "redirect:/"; // Đăng nhập đúng điều hướng về trang chủ
         } catch (Exception e) {
             model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
@@ -82,7 +101,10 @@ public class HomeController {
     // ĐĂNG XUẤT
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        session.removeAttribute("userLogin"); // Xóa session người dùng
+        // Xóa sạch toàn bộ các session liên quan đến đăng nhập và giỏ hàng
+        session.removeAttribute("userLogin"); 
+        session.removeAttribute("user");
+        session.removeAttribute("cartSize");
         return "redirect:/";
     }
 
@@ -103,7 +125,7 @@ public class HomeController {
         }
     }
 
-    // 5. XEM LỊCH SỬ ĐƠN HÀNG CỦA KHÁCH HÀNG ĐNG ĐĂNG NHẬP
+    // 5. XEM LỊCH SỬ ĐƠN HÀNG CỦA KHÁCH HÀNG ĐANG ĐĂNG NHẬP
     @GetMapping("/lich-su-don-hang")
     public String getLichSuDonHang(HttpSession session, Model model) {
         User userLogin = (User) session.getAttribute("userLogin");

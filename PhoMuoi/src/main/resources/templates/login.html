@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập - PhoMuoi</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #FFFFFF; /* Giữ nguyên background trắng bên ngoài như hình */
+            min-vh: 100vh;
+        }
+
+        /* Custom lại khung xám bên trong sang trọng và mượt mà hơn */
+        .login-card {
+            background-color: #EAEAEA; /* Màu nền xám chuẩn theo phom cũ nhưng làm dịu hơn */
+            border-radius: 16px;       /* Bo góc mềm mại modern */
+            padding: 40px 50px;        /* Tạo khoảng thở rộng rãi cho form */
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05); /* Đổ bóng nhẹ hi-tech */
+            max-width: 520px;
+            width: 100%;
+        }
+
+        .login-title {
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #000000;
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Ô nhập liệu custom */
+        .form-control {
+            border: 1px solid #CCCCCC;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #1B1AB1;
+            box-shadow: 0 0 0 3px rgba(27, 26, 177, 0.15);
+        }
+
+        /* Custom nút Đăng nhập đồng bộ màu xanh thương hiệu PhoMuoi (Hoặc giữ xanh lá nếu muốn) */
+        .btn-login {
+            background-color: #1B1AB1; /* Đồng bộ với màu xanh đậm thương hiệu của Header */
+            color: #FFFFFF;
+            font-weight: 600;
+            padding: 12px 35px;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-login:hover {
+            background-color: #111085;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center min-vh-100">
+
+    <div class="login-card">
+        <h3 class="text-center login-title">ĐĂNG NHẬP</h3>
+        
+        <form th:action="@{/login}" method="POST">
+            
+            <div class="row align-items-center mb-4">
+                <div class="col-sm-4 text-sm-end mb-2 mb-sm-0">
+                    <label for="sdt" class="form-label">Số điện thoại:</label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="text" id="sdt" name="sdt" class="form-control" placeholder="Nhập số điện thoại" required autocomplete="username">
+                </div>
+            </div>
+
+            <div class="row align-items-center mb-4">
+                <div class="col-sm-4 text-sm-end mb-2 mb-sm-0">
+                    <label for="mat_khau" class="form-label">Mật khẩu:</label>
+                </div>
+                <div class="col-sm-8">
+                    <input type="password" id="mat_khau" name="mat_khau" class="form-control" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-sm-8 offset-sm-4 text-center text-sm-start">
+                    <button type="submit" class="btn btn-login shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                    </button>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
