@@ -6,6 +6,12 @@ import jakarta.servlet.http.HttpSession; // Dùng để lưu trạng thái đăn
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import clc65.quanggck.repos.*;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Controller 
@@ -17,15 +23,20 @@ public class HomeController {
     private final QuangCaoService quangCaoService;
     private final UserService userService;
     private final DonHangService donHangService;
+    
+    // Đã sửa: Chuyển sang thuộc tính 'final' để ép buộc Constructor Injection ổn định
+    private final UserRepository userRepository;
 
+    // Đã sửa: Bổ sung thêm 'UserRepository userRepository' vào Constructor để Spring Boot tự động Inject chuẩn 100%
     public HomeController(MonAnService monAnService, DanhMucService danhMucService, 
                           QuangCaoService quangCaoService, UserService userService, 
-                          DonHangService donHangService) {
+                          DonHangService donHangService, UserRepository userRepository) {
         this.monAnService = monAnService;
         this.danhMucService = danhMucService;
         this.quangCaoService = quangCaoService;
         this.userService = userService;
         this.donHangService = donHangService;
+        this.userRepository = userRepository; // Khởi tạo thành công biến userRepository
     }
 
     // 1. TRANG CHỦ / INDEX
@@ -98,25 +109,97 @@ public class HomeController {
         }
     }
     
- // 6. XEM TRANG CÁ NHÂN (TÀI KHOẢN)
+    // 6. XEM TRANG CÁ NHÂN (TÀI KHẢN)
     @GetMapping("/tai-khoan")
     public String showTaiKhoan(HttpSession session, Model model) {
-        User userLogin = (User) session.getAttribute("userLogin");
+        User userInSession = (User) session.getAttribute("user");
         
-        if (userLogin == null) {
+        if (userInSession == null) {
             return "redirect:/login";
         }
         
-        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
-        model.addAttribute("user", userLogin); 
+        // Đã bổ sung: Load danh sách danh mục để thanh Menu Header không bị trắng trơn dữ liệu
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
         
-        return "tai-khoan"; 
+        // Lấy dữ liệu mới tinh từ database ra hiển thị
+        User freshUser = userRepository.findById(userInSession.getUserId()).orElse(null);
+        model.addAttribute("user", freshUser); 
+        
+        return "tai-khoan";
+    }
+
+    // GIAO DIỆN CẬP NHẬT THÔNG TIN TÀI KHOẢN
+    @GetMapping("/tai-khoan/update")
+    public String showUpdateForm(HttpSession session, Model model) {
+        User userInSession = (User) session.getAttribute("user");
+        if (userInSession == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
+        User freshUser = userRepository.findById(userInSession.getUserId()).orElse(null);
+        model.addAttribute("user", freshUser);
+        return "update-mk"; // Mở file update-mk.html
+    }
+
+    // XỬ LÝ CẬP NHẬT THÔNG TIN (Hàm sửa lỗi kết hợp upload ảnh vật lý)
+    @PostMapping("/tai-khoan/update")
+    public String updateTaiKhoan(
+            @RequestParam("tenKhach") String tenKhach,
+            @RequestParam("sdt") String sdt,
+            @RequestParam("diaChi") String diaChi,
+            @RequestParam("anhProfile") MultipartFile anhProfile,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        User currentUser = (User) session.getAttribute("user");
+        
+        if (currentUser == null) {
+            return "redirect:/login"; 
+        }
+
+        try {
+            // Tìm đối tượng thực tế bám chặt dữ liệu database gốc
+            User userDb = userRepository.findById(currentUser.getUserId()).orElse(null);
+            if (userDb != null) {
+                userDb.setTenKhach(tenKhach);
+                userDb.setSdt(sdt);
+                userDb.setDiaChi(diaChi);
+                
+                // Xử lý lưu ảnh nếu người dùng chọn file mới
+                if (anhProfile != null && !anhProfile.isEmpty()) {
+                    String folderPath = "src/main/resources/static/images/profiles/";
+                    String fileName = System.currentTimeMillis() + "_" + anhProfile.getOriginalFilename();
+
+                    File destFile = new File(folderPath + fileName);
+                    if (!destFile.getParentFile().exists()) {
+                        destFile.getParentFile().mkdirs(); 
+                    }
+
+                    anhProfile.transferTo(destFile);
+                    userDb.setAnh(fileName); // Lưu tên file ảnh đại diện vào trường 'anh'
+                }
+
+                // Thực hiện lưu thành công thông qua userRepository viết thường đã được tiêm
+                userRepository.save(userDb);
+
+                // Đồng bộ cập nhật lại toàn bộ các phiên Session hiện hành
+                session.setAttribute("user", userDb);
+                session.setAttribute("userLogin", userDb);
+
+                redirectAttributes.addFlashAttribute("messageSuccess", "Cập nhật thông tin thành công!");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("messageError", "Có lỗi xảy ra trong quá trình tải ảnh!");
+        }
+
+        return "redirect:/tai-khoan";
     }
 
     // ĐĂNG XUẤT
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        // Xóa sạch toàn bộ các session liên quan đến đăng nhập và giỏ hàng
         session.removeAttribute("userLogin"); 
         session.removeAttribute("user");
         session.removeAttribute("cartSize");
@@ -128,19 +211,18 @@ public class HomeController {
     public String createDonHang(@ModelAttribute DonHang donHang, HttpSession session, Model model) {
         User userLogin = (User) session.getAttribute("userLogin");
         if (userLogin == null) {
-            return "redirect:/login"; // Chưa đăng nhập bắt buộc đi đăng nhập
+            return "redirect:/login"; 
         }
         try {
-            donHang.setUser(userLogin); // Gán user đang đăng nhập vào đơn hàng
+            donHang.setUser(userLogin); 
             donHangService.createDonHang(donHang);
-            return "redirect:/lich-su-don-hang"; // Đặt thành công chuyển đến trang lịch sử
+            return "redirect:/lich-su-don-hang"; 
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             return "redirect:/gio-hang?error";
         }
     }
 
-    // 5. XEM LỊCH SỬ ĐƠN HÀNG CỦA KHÁCH HÀNG ĐANG ĐĂNG NHẬP
     @GetMapping("/lich-su-don-hang")
     public String getLichSuDonHang(HttpSession session, Model model) {
         User userLogin = (User) session.getAttribute("userLogin");
@@ -148,11 +230,11 @@ public class HomeController {
             return "redirect:/login";
         }
         
-        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
-        // Lấy lịch sử đơn theo ID người dùng đang đăng nhập trong Session
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
+
         List<DonHang> lichSu = donHangService.getLichSuDonHang(userLogin.getUserId());
         model.addAttribute("dsDonHang", lichSu);
         
-        return "lich-su"; // Mở file lich-su.html
+        return "lich-su"; 
     }
 }
