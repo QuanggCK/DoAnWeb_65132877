@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import clc65.quanggck.repos.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,11 +24,8 @@ public class HomeController {
     private final QuangCaoService quangCaoService;
     private final UserService userService;
     private final DonHangService donHangService;
-    
-    // Đã sửa: Chuyển sang thuộc tính 'final' để ép buộc Constructor Injection ổn định
     private final UserRepository userRepository;
 
-    // Đã sửa: Bổ sung thêm 'UserRepository userRepository' vào Constructor để Spring Boot tự động Inject chuẩn 100%
     public HomeController(MonAnService monAnService, DanhMucService danhMucService, 
                           QuangCaoService quangCaoService, UserService userService, 
                           DonHangService donHangService, UserRepository userRepository) {
@@ -36,7 +34,7 @@ public class HomeController {
         this.quangCaoService = quangCaoService;
         this.userService = userService;
         this.donHangService = donHangService;
-        this.userRepository = userRepository; // Khởi tạo thành công biến userRepository
+        this.userRepository = userRepository; 
     }
 
     // 1. TRANG CHỦ / INDEX
@@ -46,14 +44,11 @@ public class HomeController {
         model.addAttribute("dsMonAn", monAnService.getMonAnDangBan());
         model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
         
-        // --- ĐỒNG BỘ LOGIC KIỂM TRA ĐĂNG NHẬP & GIỎ HÀNG CHO HEADER ---
         User userLogin = (User) session.getAttribute("userLogin");
         if (userLogin != null) {
-            // Đếm số lượng món trong giỏ hàng thực tế từ cơ sở dữ liệu của User này
             int cartSize = donHangService.getCartSizeByUserId(userLogin.getUserId()); 
             session.setAttribute("cartSize", cartSize);
         } else {
-            // Nếu chưa đăng nhập thì mặc định giỏ hàng bằng 0
             session.setAttribute("cartSize", 0);
         }
         
@@ -63,9 +58,9 @@ public class HomeController {
     // 2. GIAO DIỆN ĐĂNG KÝ
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
-        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
         model.addAttribute("user", new User());
-        return "register"; // Mở file register.html
+        return "register"; 
     }
 
     // XỬ LÝ ĐĂNG KÝ
@@ -83,9 +78,17 @@ public class HomeController {
 
     // 3. GIAO DIỆN ĐĂNG NHẬP
     @GetMapping("/login")
-    public String showLoginForm(Model model) {
-        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
-        return "login"; // Mở file login.html
+    public String showLoginForm(Model model, HttpSession session) {
+        User userInSession = (User) session.getAttribute("user");
+        
+        if (userInSession != null) {
+            return "redirect:/tai-khoan";
+        }
+        
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
+        model.addAttribute("user", new User()); 
+        
+        return "login"; 
     }
 
     // XỬ LÝ ĐĂNG NHẬP
@@ -94,18 +97,21 @@ public class HomeController {
                         @RequestParam("mat_khau") String matKhau, 
                         HttpSession session, Model model) {
         try {
-            // Gọi tầng service xử lý kiểm tra SĐT và mật khẩu
             User user = userService.login(sdt, matKhau);
             
-            // ĐỒNG BỘ SESSION:
-            session.setAttribute("user", user);       // Để Header nhận biết: ${session.user != null}
-            session.setAttribute("userLogin", user);  // Giữ nguyên cho các tầng logic cũ của bạn
+            session.setAttribute("user", user);       
+            session.setAttribute("userLogin", user);  
             
-            return "redirect:/"; // Đăng nhập đúng điều hướng về trang chủ
+            return "redirect:/"; 
         } catch (Exception e) {
             model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
             model.addAttribute("error", e.getMessage());
-            return "login"; // Sai mật khẩu/SĐT quay lại trang login báo lỗi
+            
+            // ĐÃ SỬA: Thêm object user rỗng vào đây để phòng trường hợp đăng nhập thất bại, 
+            // Thymeleaf khi render lại trang login kèm thông báo lỗi không bị crash.
+            model.addAttribute("user", new User()); 
+            
+            return "login"; 
         }
     }
     
@@ -118,10 +124,8 @@ public class HomeController {
             return "redirect:/login";
         }
         
-        // Đã bổ sung: Load danh sách danh mục để thanh Menu Header không bị trắng trơn dữ liệu
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
         
-        // Lấy dữ liệu mới tinh từ database ra hiển thị
         User freshUser = userRepository.findById(userInSession.getUserId()).orElse(null);
         model.addAttribute("user", freshUser); 
         
@@ -135,13 +139,13 @@ public class HomeController {
         if (userInSession == null) {
             return "redirect:/login";
         }
-        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); // Cho header
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
         User freshUser = userRepository.findById(userInSession.getUserId()).orElse(null);
         model.addAttribute("user", freshUser);
-        return "update-mk"; // Mở file update-mk.html
+        return "update-mk"; 
     }
 
-    // XỬ LÝ CẬP NHẬT THÔNG TIN (Hàm sửa lỗi kết hợp upload ảnh vật lý)
+    // XỬ LÝ CẬP NHẬT THÔNG TIN
     @PostMapping("/tai-khoan/update")
     public String updateTaiKhoan(
             @RequestParam("tenKhach") String tenKhach,
@@ -149,49 +153,43 @@ public class HomeController {
             @RequestParam("diaChi") String diaChi,
             @RequestParam("anhProfile") MultipartFile anhProfile,
             HttpSession session,
+            HttpServletRequest request,           // ← THÊM CÁI NÀY
             RedirectAttributes redirectAttributes) {
 
         User currentUser = (User) session.getAttribute("user");
-        
-        if (currentUser == null) {
-            return "redirect:/login"; 
-        }
+        if (currentUser == null) return "redirect:/login";
 
         try {
-            // Tìm đối tượng thực tế bám chặt dữ liệu database gốc
             User userDb = userRepository.findById(currentUser.getUserId()).orElse(null);
             if (userDb != null) {
                 userDb.setTenKhach(tenKhach);
                 userDb.setSdt(sdt);
                 userDb.setDiaChi(diaChi);
-                
-                // Xử lý lưu ảnh nếu người dùng chọn file mới
-                if (anhProfile != null && !anhProfile.isEmpty()) {
-                    String folderPath = "src/main/resources/static/images/profiles/";
-                    String fileName = System.currentTimeMillis() + "_" + anhProfile.getOriginalFilename();
 
-                    File destFile = new File(folderPath + fileName);
-                    if (!destFile.getParentFile().exists()) {
-                        destFile.getParentFile().mkdirs(); 
+                if (anhProfile != null && !anhProfile.isEmpty()) {
+                    String uploadDir = System.getProperty("user.home") + "/phomuoi-uploads/profiles/";
+                    
+                    File folder = new File(uploadDir);
+                    if (!folder.exists()) {
+                        folder.mkdirs();
                     }
 
+                    String fileName = System.currentTimeMillis() + "_" + anhProfile.getOriginalFilename();
+                    File destFile = new File(folder, fileName);
                     anhProfile.transferTo(destFile);
-                    userDb.setAnh(fileName); // Lưu tên file ảnh đại diện vào trường 'anh'
+                    
+                    userDb.setAnh(fileName);
                 }
 
-                // Thực hiện lưu thành công thông qua userRepository viết thường đã được tiêm
                 userRepository.save(userDb);
-
-                // Đồng bộ cập nhật lại toàn bộ các phiên Session hiện hành
                 session.setAttribute("user", userDb);
                 session.setAttribute("userLogin", userDb);
-
-                redirectAttributes.addFlashAttribute("messageSuccess", "Cập nhật thông tin thành công!");
+                redirectAttributes.addFlashAttribute("messageSuccess", "Cập nhật thành công!");
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("messageError", "Có lỗi xảy ra trong quá trình tải ảnh!");
+            redirectAttributes.addFlashAttribute("messageError", "Lỗi khi tải ảnh!");
         }
 
         return "redirect:/tai-khoan";
@@ -203,10 +201,10 @@ public class HomeController {
         session.removeAttribute("userLogin"); 
         session.removeAttribute("user");
         session.removeAttribute("cartSize");
-        return "redirect:/";
+        return "redirect:/login"; 
     }
 
-    // 4. XỬ LÝ ĐẶT HÀNG (CHECK OUT) FROM GIỎ HÀNG THYMELEAF
+    // 4. XỬ LÝ ĐẶT HÀNG
     @PostMapping("/dat-hang")
     public String createDonHang(@ModelAttribute DonHang donHang, HttpSession session, Model model) {
         User userLogin = (User) session.getAttribute("userLogin");
