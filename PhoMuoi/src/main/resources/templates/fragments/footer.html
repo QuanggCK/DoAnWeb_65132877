@@ -6,78 +6,77 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .phomuoi-footer {
-            background-color: #000000; /* Nền đen chuẩn như hình */
-            color: #FFFFFF;            /* Chữ trắng */
-            font-family: 'Montserrat', sans-serif;
-            padding: 35px 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-            border-top: 1px solid #111111;
-        }
-
-        .footer-left {
-            font-size: 15px;
-            font-weight: 600;          /* In đậm tên tác giả vừa phải */
-            letter-spacing: 0.3px;
-        }
-
-        .footer-right {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;                 /* Khoảng cách giữa dòng Facebook và Youtube */
-        }
-
-        .footer-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;     /* Bỏ gạch chân link */
-            color: #FFFFFF;
-            font-size: 14px;
-            font-weight: 500;
-            transition: opacity 0.2s ease;
-        }
-
-        .footer-item:hover {
-            opacity: 0.8;              /* Hiệu ứng mờ nhẹ khi hover */
-        }
-
-        .footer-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Tối ưu hiển thị responsive mượt mà trên Điện thoại */
-        @media (max-width: 768px) {
-            .phomuoi-footer {
-                flex-direction: column;
-                text-align: center;
-                gap: 22px;
-                padding: 30px 20px;
-            }
-            .footer-right {
-                align-items: center;
-            }
-        }
-    </style>
 </head>
 <body>
 
     <footer class="phomuoi-footer" th:fragment="footerMain">
+        
+        <style>
+            .phomuoi-footer {
+                background-color: #000000; /* Nền đen chuẩn như hình */
+                color: #FFFFFF;            /* Chữ trắng */
+                font-family: 'Montserrat', sans-serif;
+                padding: 35px 60px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-sizing: border-box;
+                border-top: 1px solid #111111;
+            }
+
+            .footer-left {
+                font-size: 15px;
+                font-weight: 600;
+                letter-spacing: 0.3px;
+            }
+
+            .footer-right {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .footer-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                text-decoration: none;
+                color: #FFFFFF;
+                font-size: 14px;
+                font-weight: 500;
+                transition: opacity 0.2s ease;
+            }
+
+            .footer-item:hover {
+                opacity: 0.8;
+            }
+
+            .footer-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+            }
+
+            @media (max-width: 768px) {
+                .phomuoi-footer {
+                    flex-direction: column;
+                    text-align: center;
+                    gap: 22px;
+                    padding: 30px 20px;
+                }
+                .footer-right {
+                    align-items: center;
+                }
+            }
+        </style>
         
         <div class="footer-left">
             Developed by Phạm Minh Quang - QuanggcK
         </div>
         
         <div class="footer-right">
-            
             <a href="https://www.facebook.com/pham.minh.quang.670165" target="_blank" class="footer-item">
                 <span class="footer-icon">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="#1877F2">
@@ -95,7 +94,6 @@
                 </span>
                 <span>https://www.youtube.com/@quanggck7908</span>
             </a>
-            
         </div>
     </footer>
 
