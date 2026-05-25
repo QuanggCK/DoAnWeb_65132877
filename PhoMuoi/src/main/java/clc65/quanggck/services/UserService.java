@@ -26,6 +26,7 @@ public class UserService {
         }
 
         user.setRoleAdmin(false); 
+        user.setAnh("default-avatar.png");
         return userRepository.save(user);
     }
 
