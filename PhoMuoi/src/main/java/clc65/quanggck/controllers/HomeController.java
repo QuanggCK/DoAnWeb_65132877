@@ -97,6 +97,21 @@ public class HomeController {
             return "login"; // Sai mật khẩu/SĐT quay lại trang login báo lỗi
         }
     }
+    
+ // 6. XEM TRANG CÁ NHÂN (TÀI KHOẢN)
+    @GetMapping("/tai-khoan")
+    public String showTaiKhoan(HttpSession session, Model model) {
+        User userLogin = (User) session.getAttribute("userLogin");
+        
+        if (userLogin == null) {
+            return "redirect:/login";
+        }
+        
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
+        model.addAttribute("user", userLogin); 
+        
+        return "tai-khoan"; 
+    }
 
     // ĐĂNG XUẤT
     @GetMapping("/logout")
