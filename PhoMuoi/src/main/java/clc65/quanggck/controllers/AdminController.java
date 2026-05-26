@@ -65,18 +65,31 @@ public class AdminController {
     
  // ----- Thêm vào cụm QUẢN LÝ QUẢNG CÁO trong AdminController.java -----
 
-	 // 1. API Lấy chi tiết 1 quảng cáo theo ID để sửa
-	 @GetMapping("/quang-cao/{id}")
-	 public ResponseEntity<QuangCao> getQuangCaoById(@PathVariable Integer id) {
-	     return ResponseEntity.ok(quangCaoService.getQuangCaoById(id));
-	 }
-	
-	 // 2. API Cập nhật thông tin quảng cáo
-	 @PutMapping("/quang-cao/{id}")
-	 public ResponseEntity<QuangCao> updateQuangCao(@PathVariable Integer id, @RequestBody QuangCao quangCaoMoi) {
-	     quangCaoMoi.setId(id); // Đảm bảo giữ đúng ID cần cập nhật
-	     return ResponseEntity.ok(quangCaoService.saveQuangCao(quangCaoMoi));
-	 }
+ // ----- Thêm vào cụm QUẢN LÝ QUẢNG CÁO trong AdminController.java -----
+
+ // API 1: Lấy chi tiết một quảng cáo theo ID để đổ dữ liệu cũ lên Form sửa
+ // Đường dẫn gọi dữ liệu thực tế sẽ là: /api/admin/quang-cao/{id}
+ @GetMapping("/quang-cao/{id}")
+ public ResponseEntity<QuangCao> getQuangCaoById(@PathVariable Integer id) {
+     return ResponseEntity.ok(quangCaoService.getQuangCaoById(id));
+ }
+
+ // API 2: Nhận dữ liệu cập nhật từ form gửi lên qua phương thức PUT
+ // Đường dẫn thực tế: /api/admin/quang-cao/{id}
+ @PutMapping("/quang-cao/{id}")
+ public ResponseEntity<QuangCao> updateQuangCao(@PathVariable Integer id, @RequestBody QuangCao quangCaoMoi) {
+     // Tìm quảng cáo cũ trong DB
+     QuangCao qcOld = quangCaoService.getQuangCaoById(id);
+     
+     // Tiến hành cập nhật các trường thông tin mới
+     qcOld.setTieuDe(quangCaoMoi.getTieuDe());
+     qcOld.setNoiDung(quangCaoMoi.getNoiDung());
+     qcOld.setHinhAnh(quangCaoMoi.getHinhAnh());
+     qcOld.setTrangThai(quangCaoMoi.getTrangThai());
+     
+     // Lưu đè lại vào cơ sở dữ liệu
+     return ResponseEntity.ok(quangCaoService.saveQuangCao(qcOld));
+ }
 
     @PutMapping("/don-hang/{orderId}/trang-thai")
     public ResponseEntity<DonHang> updateTrangThaiDonHang(@PathVariable Integer orderId, @RequestParam String trangThaiMoi) {

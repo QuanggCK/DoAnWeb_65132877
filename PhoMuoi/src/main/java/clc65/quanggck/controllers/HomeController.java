@@ -238,21 +238,20 @@ public class HomeController {
         model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
         return "qc"; 
     }
- // ----- Thêm vào HomeController.java -----
 
     @GetMapping("/admin/quang-cao/edit/{id}")
     public String trangChinhSuaQuangCao(@PathVariable Integer id, HttpSession session, Model model) {
-        // Kiểm tra quyền đăng nhập Admin từ session
+        // 1. Lấy thông tin user đang đăng nhập từ Session
         User userLogin = (User) session.getAttribute("userLogin");
         
-        // Gợi ý: Kiểm tra user có tồn tại và vai trò có phải ADMIN không 
-        // (Thay thế '.getVaiTro()' bằng thuộc tính phân quyền thực tế trong Model User của bạn)
-        if (userLogin == null || !"ADMIN".equals(userLogin.getVaiTro())) {
-            return "redirect:/login"; // Không phải admin thì đá về trang login
+        // 2. Kiểm tra nếu chưa đăng nhập HOẶC thuộc tính roleAdmin không phải là true
+        if (userLogin == null || !Boolean.TRUE.equals(userLogin.getRoleAdmin())) {
+            return "redirect:/login"; // Đá ngược về trang đăng nhập nếu không phải Admin
         }
         
-        model.addAttribute("idQuangCao", id); // Truyền ID sang giao diện HTML
-        return "qc-adjust"; // Trả về file templates/qc-adjust.html
+        // 3. Nếu là Admin hợp lệ, truyền id quảng cáo xuống giao diện và mở trang sửa
+        model.addAttribute("idQuangCao", id); 
+        return "qc-adjust"; // Mở file templates/qc-adjust.html
     }
 
     // 4. XỬ LÝ ĐẶT HÀNG

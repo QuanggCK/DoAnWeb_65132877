@@ -38,6 +38,11 @@ public class QuangCaoService {
     public QuangCao saveQuangCao(QuangCao quangCao) {
         return quangCaoRepository.save(quangCao);
     }
+    public QuangCao getQuangCaoById(Integer id) {
+        return quangCaoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quảng cáo với ID: " + id));
+    }
+    
 
     public void deleteQuangCao(Integer id) {
         quangCaoRepository.deleteById(id);
