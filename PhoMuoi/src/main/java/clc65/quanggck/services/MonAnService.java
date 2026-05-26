@@ -1,6 +1,8 @@
 package clc65.quanggck.services;
 
 import clc65.quanggck.models.MonAn;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import clc65.quanggck.repos.MonAnRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -17,12 +19,10 @@ public class MonAnService {
         return monAnRepository.findAll();
     }
 
-    public List<MonAn> getMonAnDangBan() {
-        return monAnRepository.findByTrangThaiTrue();
-    }
+
 
     public List<MonAn> getMonAnByDanhMuc(Integer idDanhMuc) {
-        return monAnRepository.findByDanhMucId(idDanhMuc);
+    	return monAnRepository.findByDanhMuc_IdAndTrangThaiTrue(idDanhMuc);
     }
 
     public MonAn getMonAnById(Integer id) {
@@ -32,6 +32,9 @@ public class MonAnService {
 
     public MonAn saveMonAn(MonAn monAn) {
         return monAnRepository.save(monAn);
+    }
+    public Page<MonAn> getMonAnDangBan(Pageable pageable) {
+        return monAnRepository.findByTrangThaiTrue(pageable);
     }
 
     public void deleteMonAn(Integer id) {

@@ -2,14 +2,15 @@ package clc65.quanggck.controllers;
 
 import clc65.quanggck.models.*;
 import clc65.quanggck.services.*;
-import jakarta.servlet.http.HttpSession; // Dùng để lưu trạng thái đăng nhập của User
+import jakarta.servlet.http.HttpSession; 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import clc65.quanggck.repos.*;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,20 +40,25 @@ public class HomeController {
 
     // 1. TRANG CHỦ / INDEX
     @GetMapping({"/", "/index"})
-    public String trangChu(HttpSession session, Model model) {
-        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
-        model.addAttribute("dsMonAn", monAnService.getMonAnDangBan());
-        model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
+    public String trangChu(HttpSession session, Model model,
+                            @RequestParam(name = "page", defaultValue = "0") int page) {
         
+        Page<MonAn> pageMonAn = monAnService.getMonAnDangBan(PageRequest.of(page, 10));
+        
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
+        model.addAttribute("dsMonAn", pageMonAn.getContent());
+        model.addAttribute("totalPages", pageMonAn.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
+
         User userLogin = (User) session.getAttribute("userLogin");
         if (userLogin != null) {
-            int cartSize = donHangService.getCartSizeByUserId(userLogin.getUserId()); 
-            session.setAttribute("cartSize", cartSize);
+            session.setAttribute("cartSize", donHangService.getCartSizeByUserId(userLogin.getUserId()));
         } else {
             session.setAttribute("cartSize", 0);
         }
-        
-        return "index"; 
+
+        return "index";
     }
 
     // 2. GIAO DIỆN ĐĂNG KÝ
@@ -79,15 +85,14 @@ public class HomeController {
     // 3. GIAO DIỆN ĐĂNG NHẬP
     @GetMapping("/login")
     public String showLoginForm(Model model, HttpSession session) {
-        User userInSession = (User) session.getAttribute("user");
-        
+        // SỬA: Đồng bộ kiểm tra bằng 'userLogin' thay vì 'user'
+        User userInSession = (User) session.getAttribute("userLogin");
         if (userInSession != null) {
             return "redirect:/tai-khoan";
         }
         
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
         model.addAttribute("user", new User()); 
-        
         return "login"; 
     }
 
@@ -99,18 +104,14 @@ public class HomeController {
         try {
             User user = userService.login(sdt, matKhau);
             
-            session.setAttribute("user", user);       
+            // SỬA: Lưu tập trung vào 'userLogin' để toàn bộ hệ thống cùng nhận diện chung
             session.setAttribute("userLogin", user);  
             
             return "redirect:/"; 
         } catch (Exception e) {
             model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
             model.addAttribute("error", e.getMessage());
-            
-            // ĐÃ SỬA: Thêm object user rỗng vào đây để phòng trường hợp đăng nhập thất bại, 
-            // Thymeleaf khi render lại trang login kèm thông báo lỗi không bị crash.
             model.addAttribute("user", new User()); 
-            
             return "login"; 
         }
     }
@@ -118,8 +119,8 @@ public class HomeController {
     // 6. XEM TRANG CÁ NHÂN (TÀI KHẢN)
     @GetMapping("/tai-khoan")
     public String showTaiKhoan(HttpSession session, Model model) {
-        User userInSession = (User) session.getAttribute("user");
-        
+        // SỬA: Đồng bộ kiểm tra session 'userLogin'
+        User userInSession = (User) session.getAttribute("userLogin");
         if (userInSession == null) {
             return "redirect:/login";
         }
@@ -135,7 +136,8 @@ public class HomeController {
     // GIAO DIỆN CẬP NHẬT THÔNG TIN TÀI KHOẢN
     @GetMapping("/tai-khoan/update")
     public String showUpdateForm(HttpSession session, Model model) {
-        User userInSession = (User) session.getAttribute("user");
+        // SỬA: Đồng bộ kiểm tra session 'userLogin'
+        User userInSession = (User) session.getAttribute("userLogin");
         if (userInSession == null) {
             return "redirect:/login";
         }
@@ -153,10 +155,10 @@ public class HomeController {
             @RequestParam("diaChi") String diaChi,
             @RequestParam("anhProfile") MultipartFile anhProfile,
             HttpSession session,
-            HttpServletRequest request,           // ← THÊM CÁI NÀY
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) { // SỬA: Đã xóa tham số 'HttpServletRequest request' không dùng đến
 
-        User currentUser = (User) session.getAttribute("user");
+        // SỬA: Đồng bộ lấy dữ liệu từ 'userLogin'
+        User currentUser = (User) session.getAttribute("userLogin");
         if (currentUser == null) return "redirect:/login";
 
         try {
@@ -167,9 +169,10 @@ public class HomeController {
                 userDb.setDiaChi(diaChi);
 
                 if (anhProfile != null && !anhProfile.isEmpty()) {
-                    String uploadDir = System.getProperty("user.home") + "/phomuoi-uploads/profiles/";
+                    // Mẹo lưu trữ: Nếu chưa cấu hình Resource Mapping, hãy lưu tạm vào thư mục static của Project để hiển thị được ảnh ngay
+                    String folderPath = "src/main/resources/static/images/profiles/";
                     
-                    File folder = new File(uploadDir);
+                    File folder = new File(folderPath);
                     if (!folder.exists()) {
                         folder.mkdirs();
                     }
@@ -182,7 +185,8 @@ public class HomeController {
                 }
 
                 userRepository.save(userDb);
-                session.setAttribute("user", userDb);
+                
+                // Cập nhật lại session duy nhất
                 session.setAttribute("userLogin", userDb);
                 redirectAttributes.addFlashAttribute("messageSuccess", "Cập nhật thành công!");
             }
@@ -194,12 +198,37 @@ public class HomeController {
 
         return "redirect:/tai-khoan";
     }
+    
+ // CHI TIẾT MÓN ĂN
+    @GetMapping("/mon-an/{id}")
+    public String chiTietMonAn(@PathVariable(name = "id") Integer id, Model model) {
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
+        model.addAttribute("mon", monAnService.getMonAnById(id));
+        return "detail-food";
+    }
+    
+    @GetMapping("/danh-muc/{id}")
+    public String monAnTheoDanhMuc(@PathVariable(name = "id") Integer id, HttpSession session, Model model) {
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
+        List<MonAn> dsMonAn = monAnService.getMonAnByDanhMuc(id);
+        model.addAttribute("dsMonAn", dsMonAn);
+        model.addAttribute("activeDanhMucId", id); 
+        model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
+        model.addAttribute("totalPages", 1);
+        model.addAttribute("currentPage", 0);
+        User userLogin = (User) session.getAttribute("userLogin");
+        if (userLogin != null) {
+            session.setAttribute("cartSize", donHangService.getCartSizeByUserId(userLogin.getUserId()));
+        } else {
+            session.setAttribute("cartSize", 0);
+        }
+        return "index"; 
+    }
 
     // ĐĂNG XUẤT
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.removeAttribute("userLogin"); 
-        session.removeAttribute("user");
         session.removeAttribute("cartSize");
         return "redirect:/login"; 
     }

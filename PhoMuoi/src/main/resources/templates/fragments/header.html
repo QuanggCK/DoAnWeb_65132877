@@ -33,22 +33,22 @@
             <div class="d-flex align-items-center gap-4 ps-4">
                 
                 <div class="dropdown">
-                    <a class="text-white text-decoration-none dropdown-toggle no-caret fs-6 d-flex align-items-center gap-1 nav-hover" 
-                       href="#" role="button" id="dropdownMenuDanhMuc" data-bs-toggle="dropdown" aria-expanded="false">
-                        Danh mục
-                        <i class="bi bi-caret-down-fill" style="font-size: 0.8rem;"></i> 
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" aria-labelledby="dropdownMenuDanhMuc" style="border-radius: 10px;">
-                        <li th:each="dm : ${dsDanhMuc}">
-                            <a class="dropdown-item py-2" 
-                               th:href="@{/danh-muc/{id}(id=${dm.id})}" 
-                               th:text="${dm.tenDanhMuc}">Tên Danh Mục</a>
-                        </li>
-                        <li th:if="${#lists.isEmpty(dsDanhMuc)}">
-                            <a class="dropdown-item disabled" href="#">Chưa có danh mục</a>
-                        </li>
-                    </ul>
-                </div>
+    				<a class="text-white text-decoration-none dropdown-toggle no-caret fs-6 d-flex align-items-center gap-1 nav-hover" 
+       				href="#" role="button" id="dropdownMenuDanhMuc" data-bs-toggle="dropdown" aria-expanded="false">
+        				Danh mục
+        				<i class="bi bi-caret-down-fill" style="font-size: 0.8rem;"></i> 
+    				</a>
+    			<ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" aria-labelledby="dropdownMenuDanhMuc" style="border-radius: 10px;">
+        		<li th:each="dm : ${dsDanhMuc}">
+            		<a class="dropdown-item py-2 fw-semibold" 
+               		th:href="@{/danh-muc/{id}(id=${dm.id})}" 
+               		th:text="${dm.tenDanhMuc}">Tên Danh Mục</a>
+        		</li>
+        	<li th:if="${#lists.isEmpty(dsDanhMuc)}">
+            	<a class="dropdown-item disabled" href="#">Chưa có danh mục</a>
+        	</li>
+    </ul>
+</div>
 
                 <a th:href="${session.user != null} ? @{/tai-khoan} : @{/login}" 
                    class="text-white d-flex align-items-center justify-content-center text-decoration-none nav-hover">

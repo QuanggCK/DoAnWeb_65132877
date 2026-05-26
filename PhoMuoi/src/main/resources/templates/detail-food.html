@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${mon.tenMon} + ' - PhoMuoi'">Chi Tiết Món Ăn</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .navbar { flex-shrink: 0 !important; }
+        .phomuoi-footer { flex-shrink: 0 !important; }
+
+        .content-wrapper {
+            display: flex;
+            flex-grow: 1;
+        }
+
+        .sidebar-col {
+            width: 220px;
+            flex-shrink: 0;
+        }
+
+        .main-col {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* --- DETAIL CARD --- */
+        .detail-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 750px;
+        }
+
+        /* Header card */
+        .card-header-custom {
+            background: linear-gradient(135deg, #121ba6, #1e90ff);
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header-custom h2 {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .btn-close-custom {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+        .btn-close-custom:hover {
+            background: rgba(255,255,255,0.35);
+            color: white;
+        }
+
+        /* Body card */
+        .card-body-custom {
+            display: flex;
+            gap: 30px;
+            padding: 35px 30px;
+            align-items: flex-start;
+        }
+
+        /* Ảnh món ăn */
+        .food-img-wrapper {
+            width: 220px;
+            height: 220px;
+            flex-shrink: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #f0f0f0;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .food-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Thông tin */
+        .food-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .food-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a237e;
+            margin: 0;
+        }
+
+        .info-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-row-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-row-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .price-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .status-on  { background: #dcfce7; color: #16a34a; }
+        .status-off { background: #fee2e2; color: #ef4444; }
+
+        /* Footer card */
+        .card-footer-custom {
+            padding: 20px 30px;
+            border-top: 1px solid #f1f1f1;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-back {
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: 1.5px solid #dee2e6;
+            background: white;
+            color: #555;
+            font-weight: 600;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            text-decoration: none;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-back:hover {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .btn-add-cart {
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+        }
+        .btn-add-cart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .card-body-custom {
+                flex-direction: column;
+                align-items: center;
+            }
+            .food-img-wrapper {
+                width: 100%;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="content-wrapper">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar-col">
+            <div th:replace="~{fragments/side-bar :: sideBarMain}"></div>
+        </div>
+
+        <!-- NỘI DUNG CHÍNH -->
+        <main class="main-col">
+            <div class="detail-card">
+
+                <!-- HEADER -->
+                <div class="card-header-custom">
+                    <h2><i class="fa-solid fa-bowl-food me-2"></i> Thông Tin Chi Tiết</h2>
+                    <a th:href="@{/}" class="btn-close-custom">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
+                </div>
+
+                <!-- BODY -->
+                <div class="card-body-custom">
+
+                    <!-- Ảnh -->
+                    <div class="food-img-wrapper">
+                        <img th:if="${mon.hinhAnh != null and mon.hinhAnh != ''}"
+                             th:src="@{/images/mon-an/{h}(h=${mon.hinhAnh})}"
+                             th:alt="${mon.tenMon}">
+                        <img th:if="${mon.hinhAnh == null or mon.hinhAnh == ''}"
+                             th:src="@{/images/profiles/dish.png}"
+                             alt="Ảnh mặc định">
+                    </div>
+
+                    <!-- Thông tin -->
+                    <div class="food-info">
+                        <p class="food-name" th:text="${mon.tenMon}">Tên món ăn</p>
+
+                        <div class="info-row">
+                            <span class="info-row-label"><i class="fa-solid fa-tag me-1"></i> Giá</span>
+                            <span class="price-value"
+                                  th:text="${#numbers.formatDecimal(mon.giaTien, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                0 đ
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-row-label"><i class="fa-solid fa-layer-group me-1"></i> Danh mục</span>
+                            <span class="info-row-value" th:text="${mon.danhMuc?.tenDanhMuc}">Danh mục</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-row-label"><i class="fa-solid fa-seedling me-1"></i> Nguyên liệu</span>
+                            <span class="info-row-value" th:text="${mon.nguyenLieu}">Nguyên liệu</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-row-label"><i class="fa-solid fa-circle-info me-1"></i> Trạng thái</span>
+                            <span th:if="${mon.trangThai}" class="status-badge status-on">
+                                <i class="fa-solid fa-circle-check"></i> Đang bán
+                            </span>
+                            <span th:if="${!mon.trangThai}" class="status-badge status-off">
+                                <i class="fa-solid fa-circle-xmark"></i> Ngừng bán
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="card-footer-custom">
+                    <a th:href="@{/}" class="btn-back">
+                        <i class="fa-solid fa-chevron-left"></i> Quay lại
+                    </a>
+                    <button class="btn-add-cart">
+                        <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+                    </button>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <div th:replace="~{fragments/footer :: footerMain}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
