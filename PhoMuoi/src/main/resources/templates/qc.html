@@ -121,8 +121,8 @@
                     <div class="qc-img-wrapper">
                         <span class="qc-badge">ĐANG DIỄN RA</span>
                         <img th:if="${qc.hinhAnh != null and qc.hinhAnh != ''}"
-                             th:src="@{/images/quang-cao/{h}(h=${qc.hinhAnh})}"
-                             th:alt="${qc.tieuDe}">
+     						 th:src="${#strings.contains(qc.hinhAnh, '_')} ? @{/images/announcements/{h}(h=${qc.hinhAnh})} : @{/images/quang-cao/{h}(h=${qc.hinhAnh})}"
+     						 th:alt="${qc.tieuDe}">
                         <img th:if="${qc.hinhAnh == null or qc.hinhAnh == ''}"
                              th:src="@{/images/profiles/dish.png}"
                              alt="Ảnh mặc định PhoMuoi">

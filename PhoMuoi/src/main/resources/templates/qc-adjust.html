@@ -2,102 +2,168 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Chỉnh Sửa Quảng Cáo - Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Điều Chỉnh Quảng Cáo - PhoMuoi</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        body { font-family: 'Montserrat', sans-serif; background-color: #f4f6f9; }
-        .card-adjust { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F4F6F9;
+            color: #374151;
+        }
+        .card-adjust {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: none;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 14px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #121ba6;
+            box-shadow: 0 0 0 0.25rem rgba(18, 27, 166, 0.15);
+        }
+        .btn-save {
+            background-color: #121ba6;
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-save:hover {
+            background-color: #0b1170;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .preview-img {
+            max-height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px dashed #cbd5e1;
+        }
     </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
-    <div class="container my-5">
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="container my-5 flex-grow-1">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card card-adjust p-4 bg-white">
-                    <h3 class="fw-bold text-center mb-4" style="color: #121ba6;">CHỈNH SỬA THÔNG TIN QUẢNG CÁO</h3>
-                    
-                    <input type="hidden" id="qcId" th:value="${idQuangCao}">
+            <div class="col-lg-8">
+                
+                <div class="mb-3">
+                    <a href="javascript:history.back()" class="text-decoration-none text-secondary fw-semibold small">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                    </a>
+                </div>
 
-                    <form id="formAdjust">
+                <div class="card card-adjust p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-uppercase" style="color: #121ba6; letter-spacing: 0.5px;">
+                            <i class="bi bi-pencil-square text-warning me-2"></i>Chỉnh Sửa Quảng Cáo
+                        </h3>
+                        <p class="text-muted small">Cập nhật nội dung, tải ảnh lên thư mục announcements hoặc thay đổi trạng thái</p>
+                        <div style="width: 50px; height: 3px; background: #f97316; margin: 10px auto; border-radius: 2px;"></div>
+                    </div>
+
+                    <form th:action="@{/admin/quang-cao/edit/{id}(id=${idQuangCao})}" method="POST" enctype="multipart/form-data">
+                        
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Tiêu đề quảng cáo</label>
-                            <input type="text" class="form-control" id="tieuDe" required>
+                            <label for="tieuDe" class="form-label">Tiêu đề chương trình <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control py-2" id="tieuDe" name="tieuDe" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Nội dung chi tiết</label>
-                            <textarea class="form-control" id="noiDung" rows="4" required></textarea>
+                            <label for="noiDung" class="form-label">Nội dung chi tiết <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="noiDung" name="noiDung" rows="4" required></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Tên file hình ảnh (hoặc URL)</label>
-                            <input type="text" class="form-control" id="hinhAnh">
+                            <label for="anhQuangCao" class="form-label">Chọn hình ảnh quảng cáo mới</label>
+                            <input type="file" class="form-control py-2" id="anhQuangCao" name="anhQuangCao" accept="image/*">
+                            <div class="form-text text-muted small">Nếu không muốn thay đổi ảnh cũ, bạn hãy để trống ô này.</div>
                         </div>
 
-                        <div class="mb-3 form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="trangThai" checked>
-                            <label class="form-check-label fw-semibold" for="trangThai">Kích hoạt hiển thị</label>
+                        <div class="mb-4 d-none" id="previewContainer">
+                            <label class="form-label d-block">Hình ảnh đang hiển thị hiện tại:</label>
+                            <img src="" id="imgPreview" class="preview-img" alt="Ảnh quảng cáo hiện tại">
                         </div>
 
-                        <div class="d-flex gap-3 justify-content-end mt-4">
-                            <a href="javascript:history.back()" class="btn btn-secondary px-4">Hủy bỏ</a>
-                            <button type="submit" class="btn text-white px-4" style="background-color: #121ba6;">Lưu thay đổi</button>
+                        <div class="mb-4 p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <label class="form-label mb-0 d-block">Trạng thái kích hoạt</label>
+                                <span class="text-muted small">Bật để hiển thị chương trình cho khách hàng hoặc tắt để ẩn đi</span>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input" type="checkbox" id="trangThai" name="trangThai" value="true" style="cursor: pointer;">
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <a href="javascript:history.back()" class="btn btn-light w-100 py-2 fw-semibold text-secondary" style="border-radius: 8px;">
+                                    Hủy bỏ
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-save w-100 py-2 fw-semibold shadow-sm" style="border-radius: 8px;">
+                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> Lưu thay đổi
+                                </button>
+                            </div>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const qcId = document.getElementById('qcId').value;
+    <footer class="bg-dark text-white text-center py-3 mt-auto" style="font-size: 14px;">
+        <p class="mb-0">&copy; 2026 PhoMuoi Restaurant. Tất cả các quyền được bảo lưu.</p>
+    </footer>
 
-        // 1. Tự động lấy dữ liệu cũ đổ vào Form khi tải trang
-        document.addEventListener("DOMContentLoaded", function() {
-            fetch(`/api/admin/quang-cao/${qcId}`)
-                .then(res => {
-                    if(!res.ok) throw new Error("Không thể tải thông tin quảng cáo");
-                    return res.json();
+    <script th:inline="javascript">
+        // Lấy ID quảng cáo an toàn từ Thymeleaf truyền xuống
+        const idQuangCao = [[${idQuangCao}]];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            if (!idQuangCao) return;
+
+            // Gọi API lấy dữ liệu cũ để hiển thị sẵn cho Admin sửa
+            fetch(`/api/admin/quang-cao/${idQuangCao}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Không tìm thấy quảng cáo!");
+                    return response.json();
                 })
                 .then(data => {
                     document.getElementById('tieuDe').value = data.tieuDe;
                     document.getElementById('noiDung').value = data.noiDung;
-                    document.getElementById('hinhAnh').value = data.hinhAnh || '';
-                    document.getElementById('trangThai').checked = data.trangThai;
+                    document.getElementById('trangThai').checked = data.trangThai === true;
+
+                    // Đổ ảnh hiển thị cũ (Nếu ảnh cũ đang lưu ở thư mục announcements thì lấy ra, ngược lại lấy ảnh cũ ở quang-cao)
+                    if (data.hinhAnh) {
+                        const imgPreview = document.getElementById('imgPreview');
+                        
+                        // Check xem ảnh cũ có chuỗi thời gian (ảnh upload mới) hay ảnh mẫu để lấy đúng đường dẫn tương ứng
+                        if(data.hinhAnh.includes('_')) {
+                            imgPreview.src = `/images/announcements/${data.hinhAnh}`;
+                        } else {
+                            imgPreview.src = `/images/quang-cao/${data.hinhAnh}`;
+                        }
+                        
+                        document.getElementById('previewContainer').classList.remove('d-none');
+                    }
                 })
-                .catch(err => alert(err.message));
-        });
-
-        // 2. Xử lý sự kiện Submit Form để cập nhật dữ liệu (Gửi PUT)
-        document.getElementById('formAdjust').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            finalData = {
-                tieuDe: document.getElementById('tieuDe').value,
-                noiDung: document.getElementById('noiDung').value,
-                hinhAnh: document.getElementById('hinhAnh').value,
-                trangThai: document.getElementById('trangThai').checked
-            };
-
-            fetch(`/api/admin/quang-cao/${qcId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(finalData)
-            })
-            .then(res => {
-                if(res.ok) {
-                    alert("Cập nhật quảng cáo thành công!");
-                    window.location.href = "/quang-cao"; // Trở về trang danh sách quảng cáo
-                } else {
-                    alert("Có lỗi xảy ra trong quá trình cập nhật!");
-                }
-            })
-            .catch(err => console.error("Lỗi:", err));
+                .catch(error => console.error("Lỗi tải thông tin quảng cáo:", error));
         });
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

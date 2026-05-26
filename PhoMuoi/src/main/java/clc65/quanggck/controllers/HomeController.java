@@ -239,19 +239,62 @@ public class HomeController {
         return "qc"; 
     }
 
-    @GetMapping("/admin/quang-cao/edit/{id}")
-    public String trangChinhSuaQuangCao(@PathVariable Integer id, HttpSession session, Model model) {
-        // 1. Lấy thông tin user đang đăng nhập từ Session
+ // ----- Thêm/Sửa hàm xử lý cập nhật Quảng cáo trong HomeController.java -----
+
+    @PostMapping("/admin/quang-cao/edit/{id}")
+    public String updateQuangCao(
+            @PathVariable("id") Integer id,
+            @RequestParam("tieuDe") String tieuDe,
+            @RequestParam("noiDung") String noiDung,
+            @RequestParam(value = "trangThai", required = false) Boolean trangThai,
+            @RequestParam("anhQuangCao") MultipartFile anhQuangCao,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        // 1. Kiểm tra quyền Admin
         User userLogin = (User) session.getAttribute("userLogin");
-        
-        // 2. Kiểm tra nếu chưa đăng nhập HOẶC thuộc tính roleAdmin không phải là true
         if (userLogin == null || !Boolean.TRUE.equals(userLogin.getRoleAdmin())) {
-            return "redirect:/login"; // Đá ngược về trang đăng nhập nếu không phải Admin
+            return "redirect:/login";
         }
-        
-        // 3. Nếu là Admin hợp lệ, truyền id quảng cáo xuống giao diện và mở trang sửa
-        model.addAttribute("idQuangCao", id); 
-        return "qc-adjust"; // Mở file templates/qc-adjust.html
+
+        try {
+            // 2. Tìm quảng cáo gốc trong Database
+            QuangCao qcDb = quangCaoService.getQuangCaoById(id);
+            if (qcDb != null) {
+                qcDb.setTieuDe(tieuDe);
+                qcDb.setNoiDung(noiDung);
+                // Xử lý Checkbox switch (nếu không tích chọn thì giá trị nhận về là null -> gán false)
+                qcDb.setTrangThai(trangThai != null);
+
+                // 3. Xử lý tải ảnh và lưu vào thư mục static/images/announcements/
+                if (anhQuangCao != null && !anhQuangCao.isEmpty()) {
+                    String folderPath = "src/main/resources/static/images/announcements/";
+                    
+                    File folder = new File(folderPath);
+                    if (!folder.exists()) {
+                        folder.mkdirs();
+                    }
+
+                    // Đổi tên file theo thời gian thực để tránh trùng lặp ảnh trùng tên
+                    String fileName = System.currentTimeMillis() + "_" + anhQuangCao.getOriginalFilename();
+                    File destFile = new File(folder, fileName);
+                    anhQuangCao.transferTo(destFile);
+                    
+                    // Lưu tên file ảnh mới vào DB
+                    qcDb.setHinhAnh(fileName);
+                }
+
+                // 4. Lưu dữ liệu thay đổi vào Database
+                quangCaoService.saveQuangCao(qcDb);
+                redirectAttributes.addFlashAttribute("messageSuccess", "Cập nhật quảng cáo thành công!");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("messageError", "Gặp lỗi trong quá trình upload ảnh!");
+        }
+
+        // Quay trở lại trang danh sách quảng cáo/khuyến mãi (hoặc trang hiện tại tùy ý bạn)
+        return "redirect:/quang-cao"; 
     }
 
     // 4. XỬ LÝ ĐẶT HÀNG
