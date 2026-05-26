@@ -232,6 +232,28 @@ public class HomeController {
         session.removeAttribute("cartSize");
         return "redirect:/login"; 
     }
+    
+    @GetMapping("/quang-cao")
+    public String hiểnThịTrangQuangCao(Model model) {
+        model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
+        return "qc"; 
+    }
+ // ----- Thêm vào HomeController.java -----
+
+    @GetMapping("/admin/quang-cao/edit/{id}")
+    public String trangChinhSuaQuangCao(@PathVariable Integer id, HttpSession session, Model model) {
+        // Kiểm tra quyền đăng nhập Admin từ session
+        User userLogin = (User) session.getAttribute("userLogin");
+        
+        // Gợi ý: Kiểm tra user có tồn tại và vai trò có phải ADMIN không 
+        // (Thay thế '.getVaiTro()' bằng thuộc tính phân quyền thực tế trong Model User của bạn)
+        if (userLogin == null || !"ADMIN".equals(userLogin.getVaiTro())) {
+            return "redirect:/login"; // Không phải admin thì đá về trang login
+        }
+        
+        model.addAttribute("idQuangCao", id); // Truyền ID sang giao diện HTML
+        return "qc-adjust"; // Trả về file templates/qc-adjust.html
+    }
 
     // 4. XỬ LÝ ĐẶT HÀNG
     @PostMapping("/dat-hang")

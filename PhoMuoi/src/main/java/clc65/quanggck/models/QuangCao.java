@@ -1,6 +1,8 @@
 package clc65.quanggck.models;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name = "quang_cao")
@@ -21,6 +23,15 @@ public class QuangCao {
     @Column(name = "trang_thai")
     private Boolean trangThai = true; // true: đang hiển thị banner, false: ẩn đi
 
+    // --- THUỘC TÍNH MỚI THÊM ---
+    @Column(name = "ngay_km")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") // Hỗ trợ nhận dữ liệu từ thẻ <input type="datetime-local">
+    private LocalDateTime ngayKm;
+
+    @Column(name = "ngay_endkm")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime ngayEndkm;
+
     // --- GETTERS / SETTERS ---
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -36,4 +47,11 @@ public class QuangCao {
 
     public Boolean getTrangThai() { return trangThai; }
     public void setTrangThai(Boolean trangThai) { this.trangThai = trangThai; }
+
+    // Getter/Setter cho thuộc tính mới
+    public LocalDateTime getNgayKm() { return ngayKm; }
+    public void setNgayKm(LocalDateTime ngayKm) { this.ngayKm = ngayKm; }
+
+    public LocalDateTime getNgayEndkm() { return ngayEndkm; }
+    public void setNgayEndkm(LocalDateTime ngayEndkm) { this.ngayEndkm = ngayEndkm; }
 }

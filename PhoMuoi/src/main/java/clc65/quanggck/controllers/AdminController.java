@@ -62,6 +62,21 @@ public class AdminController {
     public ResponseEntity<List<DonHang>> getAllDonHang() {
         return ResponseEntity.ok(donHangService.getAllDonHang());
     }
+    
+ // ----- Thêm vào cụm QUẢN LÝ QUẢNG CÁO trong AdminController.java -----
+
+	 // 1. API Lấy chi tiết 1 quảng cáo theo ID để sửa
+	 @GetMapping("/quang-cao/{id}")
+	 public ResponseEntity<QuangCao> getQuangCaoById(@PathVariable Integer id) {
+	     return ResponseEntity.ok(quangCaoService.getQuangCaoById(id));
+	 }
+	
+	 // 2. API Cập nhật thông tin quảng cáo
+	 @PutMapping("/quang-cao/{id}")
+	 public ResponseEntity<QuangCao> updateQuangCao(@PathVariable Integer id, @RequestBody QuangCao quangCaoMoi) {
+	     quangCaoMoi.setId(id); // Đảm bảo giữ đúng ID cần cập nhật
+	     return ResponseEntity.ok(quangCaoService.saveQuangCao(quangCaoMoi));
+	 }
 
     @PutMapping("/don-hang/{orderId}/trang-thai")
     public ResponseEntity<DonHang> updateTrangThaiDonHang(@PathVariable Integer orderId, @RequestParam String trangThaiMoi) {
