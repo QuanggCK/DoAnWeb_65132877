@@ -233,14 +233,21 @@ public class HomeController {
         return "redirect:/login"; 
     }
     
-    @GetMapping("/quang-cao")
-    public String hiểnThịTrangQuangCao(Model model) {
-        model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
-        return "qc"; 
+ // ----- 1. HÀM GET: HIỂN THỊ GIAO DIỆN FORM ĐIỀU CHỈNH -----
+    @GetMapping("/admin/quang-cao/edit/{id}")
+    public String trangChinhSuaQuangCao(@PathVariable("id") Integer id, HttpSession session, Model model) {
+        // Kiểm tra quyền quản trị Admin
+        User userLogin = (User) session.getAttribute("userLogin");
+        if (userLogin == null || !Boolean.TRUE.equals(userLogin.getRoleAdmin())) {
+            return "redirect:/login"; // Khách thường hoặc chưa đăng nhập thì đá về login
+        }
+        
+        // Truyền ID quảng cáo sang Model để giao diện Thymeleaf nhận diện
+        model.addAttribute("idQuangCao", id); 
+        return "qc-adjust"; // Trả về tệp templates/qc-adjust.html
     }
 
- // ----- Thêm/Sửa hàm xử lý cập nhật Quảng cáo trong HomeController.java -----
-
+    // ----- 2. HÀM POST: XỬ LÝ NHẬN DỮ LIỆU FORM & UPLOAD FILE ẢNH -----
     @PostMapping("/admin/quang-cao/edit/{id}")
     public String updateQuangCao(
             @PathVariable("id") Integer id,
@@ -251,40 +258,40 @@ public class HomeController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        // 1. Kiểm tra quyền Admin
+        // Kiểm tra lại quyền Admin để đảm bảo an toàn bảo mật dữ liệu
         User userLogin = (User) session.getAttribute("userLogin");
         if (userLogin == null || !Boolean.TRUE.equals(userLogin.getRoleAdmin())) {
             return "redirect:/login";
         }
 
         try {
-            // 2. Tìm quảng cáo gốc trong Database
+            // Tìm kiếm đối tượng quảng cáo gốc từ Database lên
             QuangCao qcDb = quangCaoService.getQuangCaoById(id);
             if (qcDb != null) {
                 qcDb.setTieuDe(tieuDe);
                 qcDb.setNoiDung(noiDung);
-                // Xử lý Checkbox switch (nếu không tích chọn thì giá trị nhận về là null -> gán false)
+                // Xử lý nút gạt Switch dạng Boolean (Nếu không tích chọn giá trị truyền về sẽ là null)
                 qcDb.setTrangThai(trangThai != null);
 
-                // 3. Xử lý tải ảnh và lưu vào thư mục static/images/announcements/
+                // Kiểm tra xem Admin có tải tệp ảnh mới lên không
                 if (anhQuangCao != null && !anhQuangCao.isEmpty()) {
+                    // Thư mục lưu trữ theo đúng yêu cầu của bạn
                     String folderPath = "src/main/resources/static/images/announcements/";
                     
                     File folder = new File(folderPath);
                     if (!folder.exists()) {
-                        folder.mkdirs();
+                        folder.mkdirs(); // Tự động tạo thư mục nếu chưa tồn tại
                     }
 
-                    // Đổi tên file theo thời gian thực để tránh trùng lặp ảnh trùng tên
+                    // Thiết lập tên file theo thời gian thực để tránh trùng tên ảnh cũ
                     String fileName = System.currentTimeMillis() + "_" + anhQuangCao.getOriginalFilename();
                     File destFile = new File(folder, fileName);
-                    anhQuangCao.transferTo(destFile);
+                    anhQuangCao.transferTo(destFile); // Ghi file trực tiếp vào ổ đĩa
                     
-                    // Lưu tên file ảnh mới vào DB
-                    qcDb.setHinhAnh(fileName);
+                    qcDb.setHinhAnh(fileName); // Cập nhật tên file ảnh mới vào DB
                 }
 
-                // 4. Lưu dữ liệu thay đổi vào Database
+                // Tiến hành lưu cập nhật
                 quangCaoService.saveQuangCao(qcDb);
                 redirectAttributes.addFlashAttribute("messageSuccess", "Cập nhật quảng cáo thành công!");
             }
@@ -293,25 +300,160 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("messageError", "Gặp lỗi trong quá trình upload ảnh!");
         }
 
-        // Quay trở lại trang danh sách quảng cáo/khuyến mãi (hoặc trang hiện tại tùy ý bạn)
+        // Sau khi xử lý xong, chuyển hướng về trang danh sách khuyến mãi
         return "redirect:/quang-cao"; 
     }
 
-    // 4. XỬ LÝ ĐẶT HÀNG
-    @PostMapping("/dat-hang")
-    public String createDonHang(@ModelAttribute DonHang donHang, HttpSession session, Model model) {
+    @GetMapping("/gio-hang")
+    public String xemGioHang(HttpSession session, Model model) {
         User userLogin = (User) session.getAttribute("userLogin");
         if (userLogin == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
+
+        DonHang donHang = (DonHang) session.getAttribute("gioHangSession");
+        if (donHang == null) {
+            donHang = new DonHang();
+            donHang.setDsChiTietDonHang(new java.util.ArrayList<>());
+            donHang.setTongGia(0L);
+        }
+
+        // TỰ ĐỘNG ĐIỀN: Nếu đơn hàng chưa có SĐT nhận, lấy luôn SĐT của user đăng nhập
+        if (donHang.getSoDienThoaiNhan() == null || donHang.getSoDienThoaiNhan().isEmpty()) {
+            // Hãy kiểm tra trong file User.java của bạn hàm lấy SĐT tên là gì nhé (VD: getSoDienThoai(), getSdt(), getPhone()...)
+            donHang.setSoDienThoaiNhan(userLogin.getSdt()); 
+        }
+
+        model.addAttribute("donHang", donHang);
+        return "gio-hang"; 
+    }
+    // 4. XỬ LÝ ĐẶT HÀNG
+ // 4. XỬ LÝ ĐẶT HÀNG
+ // 4. XỬ LÝ ĐẶT HÀNG (LẤY DỮ LIỆU TỪ GIỎ HÀNG TRONG SESSION)
+    @PostMapping("/dat-hang")
+    public String createDonHang(@RequestParam(value = "soDienThoaiNhan", required = false) String soDienThoaiNhan,
+                                @RequestParam(value = "ghiChu", required = false) String ghiChu,
+                                HttpSession session, 
+                                RedirectAttributes redirectAttributes) {
+        
+        // 1. Kiểm tra đăng nhập
+        User userLogin = (User) session.getAttribute("userLogin");
+        if (userLogin == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để tiến hành đặt hàng!");
             return "redirect:/login"; 
         }
-        try {
-            donHang.setUser(userLogin); 
-            donHangService.createDonHang(donHang);
-            return "redirect:/lich-su-don-hang"; 
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "redirect:/gio-hang?error";
+        
+        // 2. Lấy giỏ hàng tích lũy từ Session ra
+        DonHang gioHangHienTai = (DonHang) session.getAttribute("gioHangSession");
+        if (gioHangHienTai == null || gioHangHienTai.getDsChiTietDonHang() == null || gioHangHienTai.getDsChiTietDonHang().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Giỏ hàng của bạn đang trống! Không thể đặt hàng.");
+            return "redirect:/";
         }
+        
+        try {
+            // 3. Gán các thông tin cần thiết từ khách hàng vào Đơn hàng
+            gioHangHienTai.setUser(userLogin);
+            gioHangHienTai.setNgayDat(java.time.LocalDateTime.now());
+            gioHangHienTai.setTrangThai("Chờ xử lý");
+            
+            // Nếu trên giao diện giỏ hàng có ô nhập SĐT và Ghi chú thì hứng thông tin điền vào đơn
+            if (soDienThoaiNhan != null) gioHangHienTai.setSoDienThoaiNhan(soDienThoaiNhan);
+            if (ghiChu != null) gioHangHienTai.setGhiChu(ghiChu);
+            
+            // 4. Lưu đơn hàng cùng toàn bộ danh sách CtDonHang vào Database thông qua Service của bạn
+            donHangService.createDonHang(gioHangHienTai);
+            
+            // 5. ĐẶT HÀNG THÀNH CÔNG -> Giải phóng (Xóa) giỏ hàng tạm thời để tránh trùng lặp
+            session.removeAttribute("gioHangSession");
+            session.setAttribute("cartSize", 0); // Đèn giỏ hàng trên Header tắt (trở về 0)
+            
+            // 6. Gửi thông báo thành công sang trang Lịch sử đơn hàng
+            redirectAttributes.addFlashAttribute("successMessage", "Chúc mừng! Bạn đã đặt hàng thành công.");
+            return "redirect:/lich-su-don-hang"; 
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi đặt hàng: " + e.getMessage());
+            return "redirect:/gio-hang";
+        }
+    }
+    
+ // XỬ LÝ THÊM MÓN ĂN VÀO GIỎ HÀNG TẠM THỜI
+ // XỬ LÝ THÊM MÓN ĂN VÀO GIỎ HÀNG TẠM THỜI
+    @PostMapping("/gio-hang/them")
+    public String themMonAnVaoGioHang(@RequestParam("monAnId") Integer monAnId,
+                                      @RequestParam("soLuong") Integer soLuong,
+                                      HttpSession session,
+                                      RedirectAttributes redirectAttributes) {
+        
+        User userLogin = (User) session.getAttribute("userLogin");
+        if (userLogin == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để thêm món vào giỏ hàng!");
+            return "redirect:/login";
+        }
+
+        try {
+            MonAn monAn = monAnService.getMonAnById(monAnId); 
+            if (monAn == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Món ăn này không tồn tại hoặc đã ngừng kinh doanh!");
+                return "redirect:/";
+            }
+
+            DonHang gioHang = (DonHang) session.getAttribute("gioHangSession");
+            if (gioHang == null) {
+                gioHang = new DonHang();
+                gioHang.setDsChiTietDonHang(new java.util.ArrayList<>());
+                gioHang.setTongGia(0L);
+                gioHang.setTrangThai("Chờ xử lý");
+            }
+
+            boolean daTonTai = false;
+            if (gioHang.getDsChiTietDonHang() != null) {
+                for (CtDonHang ct : gioHang.getDsChiTietDonHang()) {
+                    if (ct.getMonAn().getId().equals(monAnId)) {
+                        ct.setQuantity(ct.getQuantity() + soLuong);
+                        daTonTai = true;
+                        break;
+                    }
+                }
+            }
+
+            // 5. NẾU MÓN CHƯA CÓ -> THÊM MỚI (Đã sửa lỗi ép kiểu ở đây)
+            if (!daTonTai) {
+                CtDonHang ctMoi = new CtDonHang();
+                ctMoi.setMonAn(monAn);
+                ctMoi.setQuantity(soLuong);
+                
+                // LỖI NẰM Ở ĐÂY: Dùng .longValue() để chuyển đổi từ Double (MonAn) sang Long (CtDonHang)
+                ctMoi.setGia(monAn.getGiaTien().longValue()); 
+                
+                ctMoi.setDonHang(gioHang); 
+                gioHang.getDsChiTietDonHang().add(ctMoi);
+            }
+
+            // 6. TÍNH LẠI TỔNG TIỀN VÀ SỐ LƯỢNG
+            long tongTien = 0;
+            int tongSoLuongMon = 0;
+            for (CtDonHang ct : gioHang.getDsChiTietDonHang()) {
+                tongTien += ct.getGia() * ct.getQuantity();
+                tongSoLuongMon += ct.getQuantity();
+            }
+            gioHang.setTongGia(tongTien);
+
+            session.setAttribute("gioHangSession", gioHang);
+            session.setAttribute("cartSize", tongSoLuongMon); 
+
+            // Cập nhật lại getTenMon() cho đúng với class MonAn.java
+            redirectAttributes.addFlashAttribute("successMessage", "Đã thêm " + soLuong + " '" + monAn.getTenMon() + "' vào giỏ hàng thành công!");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể thêm món ăn: " + e.getMessage());
+        }
+
+        return "redirect:/";
     }
 
     @GetMapping("/lich-su-don-hang")
@@ -322,6 +464,9 @@ public class HomeController {
         }
         
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
+        
+        // THÊM DÒNG NÀY ĐỂ KÍCH HOẠT HIỆU ỨNG SÁNG ĐÈN Ở SIDE-BAR:
+        model.addAttribute("activePage", "lich-su");
 
         List<DonHang> lichSu = donHangService.getLichSuDonHang(userLogin.getUserId());
         model.addAttribute("dsDonHang", lichSu);

@@ -13,25 +13,48 @@
         </div>
 
         <div class="sidebar-menu">
-            <a th:each="dm : ${dsDanhMuc}" 
-               th:href="@{/danh-muc/{id}(id=${dm.id})}" 
+            <a th:href="@{/danh-muc/1}" 
                class="sidebar-item"
-               th:classappend="${activeDanhMucId == dm.id} ? 'active' : ''">
-                <span class="item-text" th:text="${dm.tenDanhMuc}">Tên Danh Mục</span>
+               th:classappend="${activeDanhMucId == 1} ? 'active' : ''">
+                <span class="item-text"><i class="fa-solid fa-bowl-food me-2"></i>Phở Bắc & Khô</span>
                 <i class="fa-solid fa-chevron-right item-arrow"></i>
             </a>
 
-            <div th:if="${#lists.isEmpty(dsDanhMuc)}" class="sidebar-empty text-muted">
-                <i class="fa-solid fa-folder-open d-block mb-2 fs-4"></i>
-                Chưa có danh mục nào
-            </div>
-            
+            <a th:href="@{/danh-muc/2}" 
+               class="sidebar-item"
+               th:classappend="${activeDanhMucId == 2} ? 'active' : ''">
+                <span class="item-text"><i class="fa-solid fa-utensils me-2"></i>Mì Tôm</span>
+                <i class="fa-solid fa-chevron-right item-arrow"></i>
+            </a>
+
+            <a th:href="@{/danh-muc/3}" 
+               class="sidebar-item"
+               th:classappend="${activeDanhMucId == 3} ? 'active' : ''">
+                <span class="item-text"><i class="fa-solid fa-plate-wheat me-2"></i>Món Nui</span>
+                <i class="fa-solid fa-chevron-right item-arrow"></i>
+            </a>
+
+            <a th:href="@{/danh-muc/4}" 
+               class="sidebar-item"
+               th:classappend="${activeDanhMucId == 4} ? 'active' : ''">
+                <span class="item-text"><i class="fa-solid fa-circle-plus me-2"></i>Các món khác</span>
+                <i class="fa-solid fa-chevron-right item-arrow"></i>
+            </a>
+
+            <a th:href="@{/danh-muc/5}" 
+               class="sidebar-item"
+               th:classappend="${activeDanhMucId == 5} ? 'active' : ''">
+                <span class="item-text"><i class="fa-solid fa-bottle-water me-2"></i>Thức uống</span>
+                <i class="fa-solid fa-chevron-right item-arrow"></i>
+            </a>
+
             <hr class="sidebar-divider">
 
-            <a th:href="@{/lich-su-don-hang}" class="sidebar-item standard-link">
-                <span class="item-text"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử đơn hàng</span>
-                <i class="fa-solid fa-chevron-right item-arrow"></i>
-            </a>
+            <a th:href="@{/lich-su-don-hang}" class="sidebar-item standard-link"
+   th:classappend="${activePage == 'lich-su'} ? 'active' : ''">
+    <span class="item-text"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử đơn hàng</span>
+    <i class="fa-solid fa-chevron-right item-arrow"></i>
+</a>
         </div>
 
         <style>
@@ -40,12 +63,12 @@
 			    border-radius: 0;
 			    overflow: hidden;
 			    width: 100%;
-			    min-height: 100%;   /* ← kéo dài full chiều cao vùng nội dung */
+			    min-height: 100%;   
 			    font-family: 'Montserrat', sans-serif;
-			}           /* ← THÊM để kéo dài hết cột */
+			}           
 
             .sidebar-header {
-                background-color: #007bbd; /* Màu tối hơn một chút tạo điểm nhấn */
+                background-color: #007bbd; 
                 color: #ffffff;
                 padding: 16px 20px;
                 font-weight: 700;
@@ -74,17 +97,15 @@
 			    font-size: 15px;
 			    transition: all 0.2s ease-in-out;
 			    border-left: 4px solid transparent;
-			    width: 100%;             /* ← THÊM để item chiếm full chiều ngang */
-}
+			    width: 100%;             
+			}
 
-            /* Hiệu ứng khi rê chuột qua (Hover) */
             .sidebar-item:hover {
                 background-color: rgba(255, 255, 255, 0.15);
                 color: #ffffff !important;
-                padding-left: 24px; /* Chữ dịch chuyển nhẹ sang phải tinh tế */
+                padding-left: 24px; 
             }
 
-            /* Trạng thái khi mục đó đang được chọn (Active) */
             .sidebar-item.active {
                 background-color: #ffffff;
                 color: #0093dd !important;
@@ -112,13 +133,6 @@
             .standard-link {
                 font-size: 14px;
                 opacity: 0.9;
-            }
-
-            .sidebar-empty {
-                padding: 30px 20px;
-                text-align: center;
-                color: rgba(255, 255, 255, 0.6) !important;
-                font-size: 13px;
             }
         </style>
     </div>

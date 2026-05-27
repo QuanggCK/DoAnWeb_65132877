@@ -40,14 +40,26 @@
                 </a>
 
                 <a th:href="@{/gio-hang}" 
-                   th:data-logged="${session.user != null}"
-                   th:data-cart-size="${session.cartSize != null ? session.cartSize : 0}"
-                   onclick="handleCartClick(this, event)"
-                   class="btn border-0 d-flex align-items-center px-4 fw-medium text-dark shadow-sm nav-hover" 
-                   style="background-color: #d9d9d9; border-radius: 50px; height: 42px; gap: 8px; font-size: 0.95rem;">
-                    <i class="bi bi-cart3 fs-5"></i>
-                    <span>Giỏ hàng</span>
-                </a>
+   th:data-logged="${session.userLogin != null}"
+   th:data-cart-size="${session.cartSize != null ? session.cartSize : 0}"
+   onclick="handleCartClick(this, event)"
+   class="btn border-0 d-flex align-items-center px-4 fw-medium shadow-sm nav-hover" 
+   
+   th:classappend="${session.cartSize != null and session.cartSize > 0} ? 'text-white' : 'text-dark'"
+   
+   th:style="${session.cartSize != null and session.cartSize > 0} ? 
+             'background-color: #F97316; border-radius: 50px; height: 42px; gap: 8px; font-size: 0.95rem; transition: 0.3s;' : 
+             'background-color: #d9d9d9; border-radius: 50px; height: 42px; gap: 8px; font-size: 0.95rem; transition: 0.3s;'">
+    
+    <i class="bi bi-cart3 fs-5"></i>
+    <span>Giỏ hàng</span>
+    
+    <span th:if="${session.cartSize != null and session.cartSize > 0}" 
+          class="badge bg-white text-danger ms-1 rounded-pill shadow-sm"
+          th:text="${session.cartSize}">
+        1
+    </span>
+</a>
 
             </div>
         </div>

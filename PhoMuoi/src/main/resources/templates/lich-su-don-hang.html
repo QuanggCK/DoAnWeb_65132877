@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử Đơn Hàng - PhoMuoi</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .content-wrapper {
+            flex-grow: 1;
+            padding: 40px 0;
+        }
+
+        .page-title {
+            color: #121ba6;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 70px;
+            height: 4px;
+            background-color: #F97316;
+            border-radius: 2px;
+        }
+
+        /* Thiết kế Thẻ chứa từng Đơn hàng độc lập */
+        .order-card {
+            border: none;
+            border-radius: 14px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 5px solid #121ba6;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.07);
+        }
+
+        .order-header {
+            background-color: #fafbfc;
+            padding: 18px 24px;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .order-id {
+            font-weight: 700;
+            color: #121ba6;
+            font-size: 1.1rem;
+        }
+
+        .order-date {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .order-body {
+            padding: 24px;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .order-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #F97316;
+        }
+
+        /* Badge Trạng thái đơn hàng linh hoạt */
+        .badge-status {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        .status-cho-xuly { background-color: #fef3c7; color: #d97706; }
+        .status-dang-giao { background-color: #e0f2fe; color: #0284c7; }
+        .status-hoan-thanh { background-color: #dcfce7; color: #16a34a; }
+        .status-da-huy { background-color: #fee2e2; color: #dc2626; }
+
+        /* Nút ẩn/hiện xem chi tiết món ăn */
+        .btn-toggle-details {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-toggle-details:hover {
+            background-color: #cbd5e1;
+            color: #1e293b;
+        }
+
+        /* Vùng bảng chi tiết món ăn bung ra */
+        .details-collapse {
+            background-color: #f8fafc;
+            border-top: 1px solid #f1f5f9;
+            padding: 20px 24px;
+        }
+
+        .nested-product-table th {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .nested-product-table td {
+            padding: 12px 0;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        /* Khối hiển thị lịch sử trống */
+        .empty-history-box {
+            text-align: center;
+            padding: 70px 20px;
+        }
+
+        .empty-history-icon {
+            font-size: 5rem;
+            color: #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .btn-checkout {
+            background-color: #F97316;
+            color: white;
+            font-weight: 600;
+            border-radius: 50px;
+            border: none;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="content-wrapper">
+        <div class="container" style="max-width: 950px;">
+            
+            <h3 class="page-title">Lịch sử đặt hàng của bạn</h3>
+
+            <div th:if="${dsDonHang != null and !#lists.isEmpty(dsDonHang)}">
+                
+                <div th:each="dh : ${dsDonHang}" class="card order-card">
+                    
+                    <div class="order-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="order-id" th:text="'Đơn hàng #' + ${dh.orderId}">Đơn hàng #1</span>
+                            <div class="order-date mt-1">
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${#temporals.format(dh.ngayDat, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <span th:if="${dh.trangThai == 'Chờ xử lý' or dh.trangThai == 'Chờ xác nhận'}" class="badge-status status-cho-xuly">
+                                <i class="bi bi-hourglass-split me-1"></i> Chờ xử lý
+                            </span>
+                            <span th:if="${dh.trangThai == 'Đang chuẩn bị' or dh.trangThai == 'Đang giao'}" class="badge-status status-dang-giao">
+                                <i class="bi bi-bicycle me-1"></i> Đang giao hàng
+                            </span>
+                            <span th:if="${dh.trangThai == 'Đã hoàn thành'}" class="badge-status status-hoan-thanh">
+                                <i class="bi bi-check-circle-fill me-1"></i> Thành công
+                            </span>
+                            <span th:if="${dh.trangThai == 'Đã hủy'}" class="badge-status status-da-huy">
+                                <i class="bi bi-x-circle-fill me-1"></i> Đã hủy
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="order-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-sm-3 col-6">
+                                <div class="info-label">Số điện thoại</div>
+                                <div class="info-value" th:text="${dh.soDienThoaiNhan != null and dh.soDienThoaiNhan != '' ? dh.soDienThoaiNhan : 'Chưa có'}">090xxxxxxx</div>
+                            </div>
+                            <div class="col-sm-5 col-6">
+                                <div class="info-label">Địa chỉ & Ghi chú</div>
+                                <div class="info-value text-truncate" style="max-width: 300px;" th:text="${dh.ghiChu != null and dh.ghiChu != '' ? dh.ghiChu : 'Không có ghi chú'}">Địa chỉ</div>
+                            </div>
+                            <div class="col-sm-2 col-6">
+                                <div class="info-label">Tổng chi phí</div>
+                                <div class="order-price" th:text="${#numbers.formatDecimal(dh.tongGia, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                            </div>
+                            <div class="col-sm-2 col-6 text-sm-end">
+                                <button class="btn btn-toggle-details" type="button" 
+                                        th:data-bs-target="'#details-' + ${dh.orderId}" 
+                                        data-bs-toggle="collapse" aria-expanded="false">
+                                    Xem món <i class="bi bi-chevron-down ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="collapse details-collapse" th:id="'details-' + ${dh.orderId}">
+                        <table class="table table-borderless nested-product-table m-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tên món ăn</th>
+                                    <th scope="col" class="text-center" style="width: 100px;">Số lượng</th>
+                                    <th scope="col" class="text-end" style="width: 150px;">Đơn giá</th>
+                                    <th scope="col" class="text-end" style="width: 150px;">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="ct : ${dh.dsChiTietDonHang}">
+                                    <td class="fw-medium text-dark" th:text="${ct.monAn.tenMonAn}">Tên món</td>
+                                    <td class="text-center fw-semibold text-secondary" th:text="${ct.quantity}">1</td>
+                                    <td class="text-end text-muted" th:text="${#numbers.formatDecimal(ct.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                                    <td class="text-end fw-semibold text-dark" th:text="${#numbers.formatDecimal(ct.gia * ct.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                </div>
+
+            <div th:if="${dsDonHang == null or #lists.isEmpty(dsDonHang)}" class="card order-card">
+                <div class="empty-history-box">
+                    <i class="fa-solid fa-clock-rotate-left empty-history-icon"></i>
+                    <h4 class="fw-bold text-secondary mb-2">Chưa có lịch sử đơn hàng</h4>
+                    <p class="text-muted mb-4">Bạn chưa thực hiện giao dịch đặt món nào trên hệ thống.</p>
+                    <a th:href="@{/}" class="btn btn-checkout px-4 py-2" style="max-width: 240px; display: inline-block; background-color: #121ba6; box-shadow: 0 4px 12px rgba(18,27,166,0.2);">
+                        <i class="fa-solid fa-arrow-left me-2"></i> Quay lại trang chủ
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footerMain}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    
+    // Sử dụng cú pháp comment /*[[...]]*/ của Thymeleaf, phía sau để giá trị mặc định là null
+    var errorMsg = /*[[${errorMessage}]]*/ null;
+    var successMsg = /*[[${successMessage}]]*/ null;
+
+    if (errorMsg) {
+        alert(errorMsg);
+    }
+    if (successMsg) {
+        alert(successMsg);
+    }
+    
+    /*]]>*/
+</script>
+</body>
+</html>

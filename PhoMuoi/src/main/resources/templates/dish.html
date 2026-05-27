@@ -214,9 +214,14 @@
                                 <a th:href="@{/mon-an/{id}(id=${mon.id})}" class="btn-detail">
                                     <i class="fa-solid fa-eye me-1"></i> Chi tiết
                                 </a>
-                                <button class="btn-cart">
-                                    <i class="fa-solid fa-cart-shopping me-1"></i> Thêm
-                                </button>
+                                <form th:action="@{/gio-hang/them}" method="POST" class="d-inline m-0">
+    <input type="hidden" name="monAnId" th:value="${mon.id}">
+    <input type="hidden" name="soLuong" value="1">
+    
+    <button type="submit" class="btn-cart" style="border: none;">
+        <i class="fa-solid fa-cart-shopping me-1"></i> Thêm
+    </button>
+</form>
                             </div>
                         </div>
 
