@@ -377,10 +377,11 @@ public class HomeController {
         return "gio-hang"; 
     }
     @PostMapping("/dat-hang")
-    public String createDonHang(@RequestParam(value = "soDienThoaiNhan", required = false) String soDienThoaiNhan,
-                                @RequestParam(value = "ghiChu", required = false) String ghiChu,
-                                HttpSession session, 
-                                RedirectAttributes redirectAttributes) {
+    public String createDonHang(
+            @RequestParam(value = "soDienThoaiNhan", required = false) String soDienThoaiNhan,
+            @RequestParam(value = "diaChiGiaoHang", required = false) String diaChiGiaoHang, // THÊM DÒNG NÀY
+            @RequestParam(value = "ghiChu", required = false) String ghiChu,
+            HttpSession session, RedirectAttributes redirectAttributes) {
         
         // 1. Kiểm tra đăng nhập
         User userLogin = (User) session.getAttribute("userLogin");
@@ -398,18 +399,35 @@ public class HomeController {
         
         try {
             // 3. Cập nhật thông tin nhận hàng & ghi chú từ form
-            if (soDienThoaiNhan != null) gioHangHienTai.setSoDienThoaiNhan(soDienThoaiNhan);
-            if (ghiChu != null) gioHangHienTai.setGhiChu(ghiChu);
+            if (soDienThoaiNhan != null) {
+                gioHangHienTai.setSoDienThoaiNhan(soDienThoaiNhan);
+            }
             
-            // 4. CHUYỂN TRẠNG THÁI TỪ "Giỏ hàng" -> "Chờ xác nhận" ĐỂ HỆ THỐNG GHI NHẬN LÀ ĐƠN HÀNG MỚI
-            // Hàm createDonHang có sẵn trong Service của bạn sẽ tự động gán ngày đặt và đổi sang "Chờ xác nhận"
+            if (diaChiGiaoHang != null) {
+                // Gán địa chỉ vào thực thể User được liên kết với đơn hàng này
+                if (gioHangHienTai.getUser() != null) {
+                    gioHangHienTai.getUser().setDiaChi(diaChiGiaoHang);
+                }
+                // Cập nhật lại session userLogin 
+                userLogin.setDiaChi(diaChiGiaoHang);
+                session.setAttribute("userLogin", userLogin);
+            }
+            
+            if (ghiChu != null) {
+                gioHangHienTai.setGhiChu(ghiChu);
+            }
+            
+            // 4. CHUYỂN TRẠNG THÁI TỪ "Giỏ hàng" -> "Chờ xác nhận"
             donHangService.createDonHang(gioHangHienTai);
             
-            // 5. Cập nhật lại số lượng badge hiển thị trên Header (về 0 vì giỏ hàng cũ đã biến thành đơn hàng chính thức)
+            // 5. Cập nhật lại số lượng badge hiển thị trên Header về 0
+            session.removeAttribute("gioHangSession"); 
             session.setAttribute("cartSize", 0);
             
-            redirectAttributes.addFlashAttribute("successMessage", "Chúc mừng! Bạn đã đặt hàng thành công.");
-            return "redirect:/lich-su-don-hang"; 
+            // Gửi thông báo thành công (header.html sẽ tự động bắt được và hiển thị Toast)
+            redirectAttributes.addFlashAttribute("messageSuccess", "Chúc mừng! Bạn đã đặt hàng thành công.");
+           
+            return "redirect:/"; 
             
         } catch (Exception e) {
             e.printStackTrace();

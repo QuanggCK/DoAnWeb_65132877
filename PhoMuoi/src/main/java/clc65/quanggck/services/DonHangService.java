@@ -59,7 +59,8 @@ public class DonHangService {
 
         int totalSize = 0;
         for (DonHang donHang : danhSachDonHang) {
-            if ("Giỏ hàng".equalsIgnoreCase(donHang.getTrangThai()) || "Chờ xác nhận".equalsIgnoreCase(donHang.getTrangThai())) {
+            // SỬA Ở ĐÂY: Chỉ đếm những đơn hàng đang có trạng thái là "Giỏ hàng"
+            if ("Giỏ hàng".equalsIgnoreCase(donHang.getTrangThai())) {
                 
                 if (donHang.getDsChiTietDonHang() != null) {
                     for (CtDonHang ct : donHang.getDsChiTietDonHang()) {
@@ -68,6 +69,9 @@ public class DonHangService {
                         }
                     }
                 }
+                
+                // Đã tìm thấy giỏ hàng hiện tại thì dừng vòng lặp luôn cho tối ưu hiệu năng
+                break; 
             }
         }
         return totalSize;

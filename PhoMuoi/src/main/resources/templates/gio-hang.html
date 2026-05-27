@@ -284,10 +284,18 @@
                                 <input type="tel" class="form-control" id="soDienThoaiNhan" th:field="*{soDienThoaiNhan}" required placeholder="Nhập số điện thoại nhận...">
                             </div>
 
-                            <div class="mb-4">
-                                <label for="ghiChu" class="form-label fw-medium text-secondary">Địa chỉ giao hàng & Ghi chú</label>
-                                <textarea class="form-control" id="ghiChu" th:field="*{ghiChu}" rows="4" placeholder="Nhập số nhà, tên đường chi tiết, hướng dẫn tài xế..."></textarea>
-                            </div>
+                            <div class="mb-3">
+    							<label for="diaChiGiaoHang" class="form-label fw-medium text-secondary">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+    							<input type="text" class="form-control" id="diaChiGiaoHang" name="diaChiGiaoHang" 
+           						th:value="${session.userLogin != null ? session.userLogin.diaChi : ''}" 
+           						required placeholder="Nhập địa chỉ chi tiết (số nhà, tên đường, phường/xã)...">
+								</div>
+
+<div class="mb-4">
+    <label for="ghiChu" class="form-label fw-medium text-secondary">Ghi chú cho quán (Tùy chọn)</label>
+    <textarea class="form-control" id="ghiChu" th:field="*{ghiChu}" rows="2" 
+              placeholder="VD: Ít bánh phở, nhiều hành, không ăn cay..."></textarea>
+</div>
 
                             <div class="summary-box mb-4">
                                 <div class="summary-title">Tóm tắt chi phí</div>
