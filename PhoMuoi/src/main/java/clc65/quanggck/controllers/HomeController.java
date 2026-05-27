@@ -452,6 +452,6 @@ public class HomeController {
         List<DonHang> lichSu = donHangService.getLichSuDonHang(userLogin.getUserId());
         model.addAttribute("dsDonHang", lichSu);
         
-        return "lich-su"; 
+        return "lich-su-don-hang"; 
     }
 }
