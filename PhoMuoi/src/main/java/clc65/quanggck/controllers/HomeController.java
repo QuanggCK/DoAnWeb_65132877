@@ -336,6 +336,7 @@ public class HomeController {
 
     @GetMapping("/gio-hang")
     public String xemGioHang(HttpSession session, Model model) {
+        // 1. Kiểm tra đăng nhập
         User userLogin = (User) session.getAttribute("userLogin");
         if (userLogin == null) {
             return "redirect:/login";
@@ -343,25 +344,38 @@ public class HomeController {
 
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
 
-        DonHang donHang = (DonHang) session.getAttribute("gioHangSession");
+        // 2. LẤY GIỎ HÀNG TỪ DATABASE THEO TRẠNG THÁI "Giỏ hàng"
+        DonHang donHang = donHangService.getGioHangHienTaiByUserId(userLogin.getUserId());
+        
+        // ================= TRÌNH KIỂM TRA LOG CONSOLE =================
+        System.out.println("======= [DIAGNOSTIC] KIỂM TRA GIỎ HÀNG =======");
+        if (donHang == null) {
+            System.out.println("-> KẾT QUẢ: Không tìm thấy đơn hàng trạng thái 'Giỏ hàng' nào trong DB.");
+        } else {
+            System.out.println("-> KẾT QUẢ: Tìm thấy giỏ hàng trong Database thành công!");
+            int size = (donHang.getDsChiTietDonHang() != null) ? donHang.getDsChiTietDonHang().size() : 0;
+            System.out.println("-> SỐ LƯỢNG DÒNG SẢN PHẨM: " + size);
+            System.out.println("-> TỔNG TIỀN ĐANG TÍNH: " + donHang.getTongGia() + " đ");
+        }
+        System.out.println("=================================================");
+
+        // 3. Nếu trong DB chưa có giỏ hàng, khởi tạo object tạm tránh lỗi giao diện hiển thị
         if (donHang == null) {
             donHang = new DonHang();
             donHang.setDsChiTietDonHang(new java.util.ArrayList<>());
             donHang.setTongGia(0L);
         }
 
-        // TỰ ĐỘNG ĐIỀN: Nếu đơn hàng chưa có SĐT nhận, lấy luôn SĐT của user đăng nhập
+        // Tự động điền số điện thoại nhận từ tài khoản
         if (donHang.getSoDienThoaiNhan() == null || donHang.getSoDienThoaiNhan().isEmpty()) {
-            // Hãy kiểm tra trong file User.java của bạn hàm lấy SĐT tên là gì nhé (VD: getSoDienThoai(), getSdt(), getPhone()...)
             donHang.setSoDienThoaiNhan(userLogin.getSdt()); 
         }
 
+        // 4. Truyền biến sang Thymeleaf HTML (bắt buộc tên biến là "donHang")
         model.addAttribute("donHang", donHang);
+        
         return "gio-hang"; 
     }
-    // 4. XỬ LÝ ĐẶT HÀNG
- // 4. XỬ LÝ ĐẶT HÀNG
- // 4. XỬ LÝ ĐẶT HÀNG (LẤY DỮ LIỆU TỪ GIỎ HÀNG TRONG SESSION)
     @PostMapping("/dat-hang")
     public String createDonHang(@RequestParam(value = "soDienThoaiNhan", required = false) String soDienThoaiNhan,
                                 @RequestParam(value = "ghiChu", required = false) String ghiChu,
@@ -375,31 +389,25 @@ public class HomeController {
             return "redirect:/login"; 
         }
         
-        // 2. Lấy giỏ hàng tích lũy từ Session ra
-        DonHang gioHangHienTai = (DonHang) session.getAttribute("gioHangSession");
+        // 2. Lấy giỏ hàng từ Database lên
+        DonHang gioHangHienTai = donHangService.getGioHangHienTaiByUserId(userLogin.getUserId());
         if (gioHangHienTai == null || gioHangHienTai.getDsChiTietDonHang() == null || gioHangHienTai.getDsChiTietDonHang().isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Giỏ hàng của bạn đang trống! Không thể đặt hàng.");
             return "redirect:/";
         }
         
         try {
-            // 3. Gán các thông tin cần thiết từ khách hàng vào Đơn hàng
-            gioHangHienTai.setUser(userLogin);
-            gioHangHienTai.setNgayDat(java.time.LocalDateTime.now());
-            gioHangHienTai.setTrangThai("Chờ xử lý");
-            
-            // Nếu trên giao diện giỏ hàng có ô nhập SĐT và Ghi chú thì hứng thông tin điền vào đơn
+            // 3. Cập nhật thông tin nhận hàng & ghi chú từ form
             if (soDienThoaiNhan != null) gioHangHienTai.setSoDienThoaiNhan(soDienThoaiNhan);
             if (ghiChu != null) gioHangHienTai.setGhiChu(ghiChu);
             
-            // 4. Lưu đơn hàng cùng toàn bộ danh sách CtDonHang vào Database thông qua Service của bạn
+            // 4. CHUYỂN TRẠNG THÁI TỪ "Giỏ hàng" -> "Chờ xác nhận" ĐỂ HỆ THỐNG GHI NHẬN LÀ ĐƠN HÀNG MỚI
+            // Hàm createDonHang có sẵn trong Service của bạn sẽ tự động gán ngày đặt và đổi sang "Chờ xác nhận"
             donHangService.createDonHang(gioHangHienTai);
             
-            // 5. ĐẶT HÀNG THÀNH CÔNG -> Giải phóng (Xóa) giỏ hàng tạm thời để tránh trùng lặp
-            session.removeAttribute("gioHangSession");
-            session.setAttribute("cartSize", 0); // Đèn giỏ hàng trên Header tắt (trở về 0)
+            // 5. Cập nhật lại số lượng badge hiển thị trên Header (về 0 vì giỏ hàng cũ đã biến thành đơn hàng chính thức)
+            session.setAttribute("cartSize", 0);
             
-            // 6. Gửi thông báo thành công sang trang Lịch sử đơn hàng
             redirectAttributes.addFlashAttribute("successMessage", "Chúc mừng! Bạn đã đặt hàng thành công.");
             return "redirect:/lich-su-don-hang"; 
             

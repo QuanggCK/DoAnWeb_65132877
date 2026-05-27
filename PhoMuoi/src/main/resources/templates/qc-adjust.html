@@ -130,7 +130,7 @@
 
     <script th:inline="javascript">
         // Lấy ID quảng cáo an toàn từ Thymeleaf truyền xuống
-        const idQuangCao = [[${idQuangCao}]];
+        const idQuangCao = /*[[${idQuangCao}]]*/ null;
 
         document.addEventListener("DOMContentLoaded", function () {
             if (!idQuangCao) return;

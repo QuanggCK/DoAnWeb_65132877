@@ -72,6 +72,12 @@ public class DonHangService {
         }
         return totalSize;
     }
+    
+    public DonHang getGioHangHienTaiByUserId(Integer userId) {
+        return donHangRepository
+                .findByUser_UserIdAndTrangThai(userId, "Giỏ hàng")
+                .orElse(null);
+    }
     @Transactional
     public void themVaoGio(User user, MonAn monAn, Integer soLuong) {
 
@@ -126,4 +132,5 @@ public class DonHangService {
 
         donHangRepository.save(gioHang);
     }
+    
 }
