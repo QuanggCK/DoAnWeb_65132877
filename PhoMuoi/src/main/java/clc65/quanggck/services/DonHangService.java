@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime; 
 import java.util.List;
 
+import clc65.quanggck.models.MonAn;
+import clc65.quanggck.models.User;
+import java.util.ArrayList;
 @Service
 public class DonHangService {
 
@@ -68,5 +71,59 @@ public class DonHangService {
             }
         }
         return totalSize;
+    }
+    @Transactional
+    public void themVaoGio(User user, MonAn monAn, Integer soLuong) {
+
+        // Tìm đơn hàng "Giỏ hàng" hiện tại của user
+        DonHang gioHang = donHangRepository
+                .findByUser_UserIdAndTrangThai(user.getUserId(), "Giỏ hàng")
+                .orElse(null);
+
+        // Nếu chưa có giỏ hàng → tạo mới
+        if (gioHang == null) {
+            gioHang = new DonHang();
+            gioHang.setUser(user);
+            gioHang.setTrangThai("Giỏ hàng");
+            gioHang.setNgayDat(LocalDateTime.now());
+            gioHang.setTongGia(0L);
+            gioHang.setDsChiTietDonHang(new ArrayList<>());
+            gioHang = donHangRepository.save(gioHang);
+        }
+
+        // Kiểm tra món đã có trong giỏ chưa
+        List<CtDonHang> dsChiTiet = gioHang.getDsChiTietDonHang();
+        if (dsChiTiet == null) dsChiTiet = new ArrayList<>();
+
+        CtDonHang ctHienCo = null;
+        for (CtDonHang ct : dsChiTiet) {
+            if (ct.getMonAn().getId().equals(monAn.getId())) {
+                ctHienCo = ct;
+                break;
+            }
+        }
+
+        if (ctHienCo != null) {
+            // Món đã có → tăng số lượng
+            ctHienCo.setQuantity(ctHienCo.getQuantity() + soLuong);
+        } else {
+            // Món chưa có → thêm mới
+            CtDonHang ctMoi = new CtDonHang();
+            ctMoi.setDonHang(gioHang);
+            ctMoi.setMonAn(monAn);
+            ctMoi.setQuantity(soLuong);
+            ctMoi.setGia(monAn.getGiaTien().longValue());
+            dsChiTiet.add(ctMoi);
+            gioHang.setDsChiTietDonHang(dsChiTiet);
+        }
+
+        // Tính lại tổng giá
+        long tongGia = 0;
+        for (CtDonHang ct : gioHang.getDsChiTietDonHang()) {
+            tongGia += ct.getGia() * ct.getQuantity();
+        }
+        gioHang.setTongGia(tongGia);
+
+        donHangRepository.save(gioHang);
     }
 }

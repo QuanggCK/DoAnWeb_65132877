@@ -206,6 +206,36 @@ public class HomeController {
         model.addAttribute("mon", monAnService.getMonAnById(id));
         return "detail-food";
     }
+    @PostMapping("/gio-hang/them")
+    public String themVaoGioHang(
+            @RequestParam("monAnId") Integer monAnId,
+            @RequestParam("soLuong") Integer soLuong,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        User userLogin = (User) session.getAttribute("userLogin");
+
+        if (userLogin == null) {
+            redirectAttributes.addFlashAttribute("messageError", "Vui lòng đăng nhập để thêm vào giỏ hàng!");
+            return "redirect:/login";
+        }
+
+        try {
+            MonAn monAn = monAnService.getMonAnById(monAnId);
+            donHangService.themVaoGio(userLogin, monAn, soLuong);
+
+            int cartSize = donHangService.getCartSizeByUserId(userLogin.getUserId());
+            session.setAttribute("cartSize", cartSize);
+
+            redirectAttributes.addFlashAttribute("messageSuccess", 
+                "Đã thêm \"" + monAn.getTenMon() + "\" vào giỏ hàng!");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("messageError", "Lỗi: " + e.getMessage());
+        }
+
+        return "redirect:/";
+    }
     
     @GetMapping("/danh-muc/{id}")
     public String monAnTheoDanhMuc(@PathVariable(name = "id") Integer id, HttpSession session, Model model) {
@@ -379,83 +409,8 @@ public class HomeController {
             return "redirect:/gio-hang";
         }
     }
+   
     
- // XỬ LÝ THÊM MÓN ĂN VÀO GIỎ HÀNG TẠM THỜI
- // XỬ LÝ THÊM MÓN ĂN VÀO GIỎ HÀNG TẠM THỜI
-    @PostMapping("/gio-hang/them")
-    public String themMonAnVaoGioHang(@RequestParam("monAnId") Integer monAnId,
-                                      @RequestParam("soLuong") Integer soLuong,
-                                      HttpSession session,
-                                      RedirectAttributes redirectAttributes) {
-        
-        User userLogin = (User) session.getAttribute("userLogin");
-        if (userLogin == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để thêm món vào giỏ hàng!");
-            return "redirect:/login";
-        }
-
-        try {
-            MonAn monAn = monAnService.getMonAnById(monAnId); 
-            if (monAn == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Món ăn này không tồn tại hoặc đã ngừng kinh doanh!");
-                return "redirect:/";
-            }
-
-            DonHang gioHang = (DonHang) session.getAttribute("gioHangSession");
-            if (gioHang == null) {
-                gioHang = new DonHang();
-                gioHang.setDsChiTietDonHang(new java.util.ArrayList<>());
-                gioHang.setTongGia(0L);
-                gioHang.setTrangThai("Chờ xử lý");
-            }
-
-            boolean daTonTai = false;
-            if (gioHang.getDsChiTietDonHang() != null) {
-                for (CtDonHang ct : gioHang.getDsChiTietDonHang()) {
-                    if (ct.getMonAn().getId().equals(monAnId)) {
-                        ct.setQuantity(ct.getQuantity() + soLuong);
-                        daTonTai = true;
-                        break;
-                    }
-                }
-            }
-
-            // 5. NẾU MÓN CHƯA CÓ -> THÊM MỚI (Đã sửa lỗi ép kiểu ở đây)
-            if (!daTonTai) {
-                CtDonHang ctMoi = new CtDonHang();
-                ctMoi.setMonAn(monAn);
-                ctMoi.setQuantity(soLuong);
-                
-                // LỖI NẰM Ở ĐÂY: Dùng .longValue() để chuyển đổi từ Double (MonAn) sang Long (CtDonHang)
-                ctMoi.setGia(monAn.getGiaTien().longValue()); 
-                
-                ctMoi.setDonHang(gioHang); 
-                gioHang.getDsChiTietDonHang().add(ctMoi);
-            }
-
-            // 6. TÍNH LẠI TỔNG TIỀN VÀ SỐ LƯỢNG
-            long tongTien = 0;
-            int tongSoLuongMon = 0;
-            for (CtDonHang ct : gioHang.getDsChiTietDonHang()) {
-                tongTien += ct.getGia() * ct.getQuantity();
-                tongSoLuongMon += ct.getQuantity();
-            }
-            gioHang.setTongGia(tongTien);
-
-            session.setAttribute("gioHangSession", gioHang);
-            session.setAttribute("cartSize", tongSoLuongMon); 
-
-            // Cập nhật lại getTenMon() cho đúng với class MonAn.java
-            redirectAttributes.addFlashAttribute("successMessage", "Đã thêm " + soLuong + " '" + monAn.getTenMon() + "' vào giỏ hàng thành công!");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể thêm món ăn: " + e.getMessage());
-        }
-
-        return "redirect:/";
-    }
-
     @GetMapping("/lich-su-don-hang")
     public String getLichSuDonHang(HttpSession session, Model model) {
         User userLogin = (User) session.getAttribute("userLogin");
