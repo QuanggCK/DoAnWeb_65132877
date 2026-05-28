@@ -85,9 +85,12 @@ public class HomeController {
     // 3. GIAO DIỆN ĐĂNG NHẬP
     @GetMapping("/login")
     public String showLoginForm(Model model, HttpSession session) {
-        // SỬA: Đồng bộ kiểm tra bằng 'userLogin' thay vì 'user'
         User userInSession = (User) session.getAttribute("userLogin");
         if (userInSession != null) {
+            // Admin đã đăng nhập → về trang admin
+            if (Boolean.TRUE.equals(userInSession.getRoleAdmin())) {
+                return "redirect:/admin";
+            }
             return "redirect:/tai-khoan";
         }
         
@@ -103,11 +106,16 @@ public class HomeController {
                         HttpSession session, Model model) {
         try {
             User user = userService.login(sdt, matKhau);
-            
-            // SỬA: Lưu tập trung vào 'userLogin' để toàn bộ hệ thống cùng nhận diện chung
-            session.setAttribute("userLogin", user);  
-            
-            return "redirect:/"; 
+
+            // Lưu tập trung vào 'userLogin' để toàn bộ hệ thống cùng nhận diện chung
+            session.setAttribute("userLogin", user);
+
+            // Nếu tài khoản có quyền Admin → chuyển thẳng sang trang quản trị
+            if (Boolean.TRUE.equals(user.getRoleAdmin())) {
+                return "redirect:/admin";
+            }
+
+            return "redirect:/";
         } catch (Exception e) {
             model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc());
             model.addAttribute("error", e.getMessage());
@@ -261,6 +269,13 @@ public class HomeController {
         session.removeAttribute("userLogin"); 
         session.removeAttribute("cartSize");
         return "redirect:/login"; 
+    }
+    
+ // THÊM HÀM NÀY VÀO DƯỚI ĐÁY FILE HOMECONTROLLER.JAVA
+    @GetMapping("/quang-cao")
+    public String trangQuangCao(Model model, HttpSession session) {
+        model.addAttribute("dsQuangCao", quangCaoService.getQuangCaoDangBat());
+        return "qc"; 
     }
     
  // ----- 1. HÀM GET: HIỂN THỊ GIAO DIỆN FORM ĐIỀU CHỈNH -----

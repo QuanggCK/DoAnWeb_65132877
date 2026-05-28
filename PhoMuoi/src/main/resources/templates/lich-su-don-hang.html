@@ -250,7 +250,7 @@
                             </thead>
                             <tbody>
                                 <tr th:each="ct : ${dh.dsChiTietDonHang}">
-                                    <td class="fw-medium text-dark" th:text="${ct.monAn.tenMonAn}">Tên món</td>
+                                    <td class="fw-medium text-dark" th:text="${ct.monAn.tenMon}">Tên món</td>
                                     <td class="text-center fw-semibold text-secondary" th:text="${ct.quantity}">1</td>
                                     <td class="text-end text-muted" th:text="${#numbers.formatDecimal(ct.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
                                     <td class="text-end fw-semibold text-dark" th:text="${#numbers.formatDecimal(ct.gia * ct.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>

@@ -14,5 +14,5 @@ public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
 	List<DonHang> findByUser_UserIdOrderByOrderIdDesc(Integer userId);
 	Optional<DonHang> findByUser_UserIdAndTrangThai(Integer userId, String trangThai);
 	@Query("SELECT d FROM DonHang d LEFT JOIN FETCH d.dsChiTietDonHang WHERE d.user.userId = :userId ORDER BY d.ngayDat DESC")
-    List<DonHang> findLichSuDonHangByUserId(@Param("userId") Long userId);
+	List<DonHang> findLichSuDonHangByUserId(@Param("userId") Integer userId);
 }

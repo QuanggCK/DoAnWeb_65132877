@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quản Lý Thực Đơn – Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --border: #2a2a2a;
+    --accent: #ff5c00;
+    --accent2: #ffb800;
+    --text: #f0ece4;
+    --muted: #6b6b6b;
+    --success: #22c55e;
+    --danger: #ef4444;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+  /* --- SIDEBAR --- */
+  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;}
+  .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+  .sidebar-logo .brand{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--accent);text-decoration:none;}
+  .sidebar-logo .sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:2px;}
+  .nav{padding:16px 0;flex:1;overflow-y:auto;}
+  .nav-section{padding:8px 24px 4px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:all .2s;border-left:3px solid transparent;cursor:pointer;}
+  .nav-item:hover,.nav-item.active{color:var(--text);background:rgba(255,92,0,.08);border-left-color:var(--accent);}
+  .nav-item .icon{font-size:18px;width:20px;text-align:center;}
+  .sidebar-footer{padding:16px 24px;border-top:1px solid var(--border);font-size:12px;}
+
+  /* --- MAIN & TOPBAR --- */
+  .main{margin-left:240px;display:flex;flex-direction:column;min-height:100vh;}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;}
+  .topbar-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
+  .admin-badge{background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;}
+  .content{padding:32px;flex:1;}
+
+  /* --- BUTTONS --- */
+  .btn{padding:10px 22px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;border:none;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#e04f00;}
+  .btn-sm{padding:8px 14px;font-size:11px;border-radius:6px;}
+  .btn-danger{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+  .btn-danger:hover{background:var(--danger);color:#fff;}
+  .btn-edit{background:rgba(255,184,0,.1);color:var(--accent2);border:1px solid rgba(255,184,0,.3);}
+  .btn-edit:hover{background:var(--accent2);color:#000;}
+
+  /* --- FOOD LIST (HIỂN THỊ THEO HÀNG ĐI XUỐNG) --- */
+  .food-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+  }
+  .food-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      transition: transform 0.2s, border-color 0.2s;
+  }
+  .food-row:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+  }
+  .food-img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #1e1e1e;
+  }
+  .food-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+  }
+  .food-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: var(--text);
+  }
+  .food-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+  }
+  .food-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+  }
+  .category-badge {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent2);
+      background: rgba(255,184,0,0.1);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+  }
+  .status-badge {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+  }
+  .status-on { background: rgba(34,197,94,0.15); color: var(--success); }
+  .status-off { background: rgba(239,68,68,0.15); color: var(--danger); }
+  
+  .food-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      color: var(--success);
+      letter-spacing: 1px;
+      width: 140px;
+      text-align: right;
+  }
+  .food-actions {
+      display: flex;
+      gap: 10px;
+      border-left: 1px solid var(--border);
+      padding-left: 24px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <a href="/admin" class="brand">PHOMUOI</a>
+      <div class="sub">Admin Control Panel</div>
+    </div>
+    <div class="nav">
+      <div class="nav-section">MAIN MENU</div>
+      <a href="/admin" class="nav-item">
+        <span class="icon"><i class="fa-solid fa-chart-pie"></i></span> Tổng Quan
+      </a>
+      <a href="/admin/food" class="nav-item active">
+        <span class="icon"><i class="fa-solid fa-bowl-food"></i></span> Quản Lý Món Ăn
+      </a>
+      </div>
+    <div class="sidebar-footer">
+      <a href="/logout" style="color:var(--danger); text-decoration:none; font-weight:600;"><i class="fa-solid fa-right-from-bracket me-2"></i> Đăng Xuất</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">Danh Sách Thực Đơn</div>
+      <div class="topbar-right">
+        <span class="admin-badge">Admin System</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h2 style="font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:1px; color:var(--accent);">Quản Lý Món Ăn</h2>
+          <p style="color:var(--muted); font-size:14px; margin-top:4px;">Chỉnh sửa, cập nhật và theo dõi các món ăn trong nhà hàng.</p>
+        </div>
+        <button class="btn btn-primary" onclick="alert('Chức năng mở form thêm món sẽ kích hoạt ở đây!')">
+            <i class="fa-solid fa-plus"></i> Thêm Món Mới
+        </button>
+      </div>
+
+      <div class="food-list-container" id="food-list">
+        <div style="text-align:center; padding: 50px; color: var(--muted);">
+            <i class="fa-solid fa-spinner fa-spin fs-2 mb-3"></i><br>Đang tải dữ liệu...
+        </div>
+      </div>
+    </div>
+
+    <div th:replace=\"~{fragments/footerAdmin :: footerAdmin}\"></div>
+  </div>
+
+  <script>
+    // Hàm gọi API lấy danh sách món ăn từ Controller của bạn
+    async function loadFoods() {
+        try {
+            const res = await fetch('/api/admin/mon-an');
+            const foods = await res.json();
+            
+            const container = document.getElementById('food-list');
+            if (foods.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:50px; color:var(--muted);">Chưa có món ăn nào trong hệ thống!</div>';
+                return;
+            }
+
+            let html = '';
+            foods.forEach(f => {
+                // Xử lý logic hiển thị hình ảnh và trạng thái
+                const imgPath = f.hinhAnh ? '/images/mon-an/' + f.hinhAnh : '/images/profiles/dish.png';
+                const statusHtml = f.trangThai !== false 
+                    ? '<span class="status-badge status-on"><i class="fa-solid fa-circle-check"></i> Đang bán</span>' 
+                    : '<span class="status-badge status-off"><i class="fa-solid fa-circle-xmark"></i> Ngừng bán</span>';
+                
+                const categoryName = f.danhMuc ? f.danhMuc.tenDanhMuc : 'Chưa phân loại';
+
+                // Nối HTML cho từng hàng món ăn
+                html += `
+                <div class="food-row">
+                    <img src="${imgPath}" alt="Ảnh món" class="food-img" onerror="this.src='/images/profiles/dish.png'">
+                    
+                    <div class="food-info">
+                        <div class="food-title">${f.tenMon || 'Tên món ăn'}</div>
+                        <div class="food-meta">
+                            <span class="category-badge">${categoryName}</span>
+                            ${statusHtml}
+                        </div>
+                        <div class="food-desc">${f.nguyenLieu || f.moTa || 'Không có mô tả nguyên liệu...'}</div>
+                    </div>
+                    
+                    <div class="food-price">
+                        ${f.giaTien ? f.giaTien.toLocaleString('vi-VN') : 0} đ
+                    </div>
+                    
+                    <div class="food-actions">
+                        <button class="btn btn-sm btn-edit" onclick="editFood(${f.id})">
+                            <i class="fa-solid fa-pen"></i> Sửa
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteFood(${f.id})">
+                            <i class="fa-solid fa-trash"></i> Xóa
+                        </button>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Lỗi tải dữ liệu:', error);
+            document.getElementById('food-list').innerHTML = '<div style="color:var(--danger); text-align:center; padding:30px;">Lỗi kết nối Server! Không thể lấy dữ liệu.</div>';
+        }
+    }
+
+    async function deleteFood(id) {
+        if(confirm("Xóa món ăn này khỏi hệ thống? Hành động này không thể khôi phục!")) {
+            try {
+                await fetch('/api/admin/mon-an/' + id, { method: 'DELETE' });
+                loadFoods(); // Cập nhật lại giao diện ngay lập tức
+            } catch (e) {
+                alert("Đã xảy ra lỗi khi xóa!");
+            }
+        }
+    }
+
+    function editFood(id) {
+        alert("Nút sửa món ăn (ID: " + id + ") đã được nhấn!");
+    }
+
+    // Tải danh sách tự động khi mở trang
+    window.onload = loadFoods;
+  </script>
+</body>
+</html>
