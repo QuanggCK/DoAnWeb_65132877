@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Admin Panel – Quản Trị</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <style>
   :root {
     --bg: #0d0d0d;
@@ -18,7 +19,7 @@
     --danger: #ef4444;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
 
   /* SIDEBAR */
   .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;}
@@ -33,7 +34,7 @@
   .sidebar-footer{padding:16px 24px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
 
   /* MAIN */
-  .main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+  .main{margin-left:240px;display:flex;flex-direction:column;min-height:100vh;}
   .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;}
   .topbar-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
   .topbar-right{display:flex;align-items:center;gap:16px;}
@@ -146,66 +147,50 @@
   .img-preview{width:56px;height:42px;object-fit:cover;border-radius:6px;background:var(--border);}
   .no-img{width:56px;height:42px;background:#222;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;}
 
-  /* FOOTER */
-  .footer-main{
-    margin-left:240px;
-    background:var(--surface);
-    border-top:1px solid var(--border);
-    padding:20px 32px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:12px;
-  }
-  .footer-left{display:flex;align-items:center;gap:16px;}
-  .footer-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--accent);}
-  .footer-copy{font-size:12px;color:var(--muted);}
-  .footer-links{display:flex;gap:20px;}
-  .footer-links a{font-size:12px;color:var(--muted);text-decoration:none;transition:color .2s;}
-  .footer-links a:hover{color:var(--accent);}
-  .footer-right{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;}
-  .footer-dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* LOGOUT BUTTON */
+  .btn-logout{display:flex;align-items:center;gap:7px;padding:7px 16px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:#ef4444;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif;}
+  .btn-logout:hover{background:#ef4444;color:#fff;border-color:#ef4444;}
+
+  /* FOOTER ADMIN */
+  .footer-admin{background:var(--surface);border-top:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;width:100%;}
+  .footer-admin__left{display:flex;align-items:center;gap:14px;}
+  .footer-admin__brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--accent);}
+  .footer-admin__copy{font-size:12px;color:var(--muted);}
+  .footer-admin__nav{display:flex;gap:20px;}
+  .footer-admin__nav a{font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .2s;}
+  .footer-admin__nav a:hover{color:var(--accent);}
+  .footer-admin__right{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .footer-admin__right code{color:var(--accent);font-size:11px;}
+  .footer-admin__dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;animation:fa-pulse 2s infinite;}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="brand">ADMIN</div>
-    <div class="sub">Quản trị hệ thống</div>
-  </div>
-  <nav class="nav">
-    <div class="nav-section">Tổng quan</div>
-    <a class="nav-item active" onclick="showPage('dashboard')">
-      <span class="icon">📊</span> Dashboard
-    </a>
-    <div class="nav-section">Thực đơn</div>
-    <a href="/admin/food" class="nav-item">
-  		<span class="icon"><i class="fa-solid fa-bowl-food"></i></span>Món Ăn
-	</a>
-    <a class="nav-item" onclick="showPage('danh-muc')">
-      <span class="icon">🗂️</span> Danh Mục
-    </a>
-    <div class="nav-section">Kinh doanh</div>
-    <a class="nav-item" onclick="showPage('don-hang')">
-      <span class="icon">📦</span> Đơn Hàng
-    </a>
-    <a class="nav-item" onclick="showPage('doanh-thu')">
-      <span class="icon">💰</span> Doanh Thu
-    </a>
-    <div class="nav-section">Hệ thống</div>
-    <a class="nav-item" onclick="showPage('users')">
-      <span class="icon">👤</span> Khách Hàng
-    </a>
-    <a class="nav-item" onclick="showPage('quang-cao')">
-      <span class="icon">📢</span> Quảng Cáo
-    </a>
-  </nav>
-  <div class="sidebar-footer">API: /api/admin</div>
-</aside>
+<!-- SIDEBAR: th:replace="~{fragments/sidebarAdmin :: sidebarAdmin(activePage='dashboard')}" -->
+<div th:replace="~{fragments/sidebarAdmin :: sidebarAdmin(activePage='dashboard')}">
+  <!-- fallback sidebar (hiển thị khi mở HTML thuần không qua Thymeleaf) -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">ADMIN</div>
+      <div class="sub">Quản trị hệ thống</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Tổng quan</div>
+      <a href="/admin" class="nav-item active"><span class="icon"><i class="fa-solid fa-gauge"></i></span> Dashboard</a>
+      <div class="nav-section">Thực đơn</div>
+      <a href="/admin/food" class="nav-item"><span class="icon"><i class="fa-solid fa-bowl-food"></i></span> Món Ăn</a>
+      <a href="/admin/danh-muc" class="nav-item"><span class="icon"><i class="fa-solid fa-layer-group"></i></span> Danh Mục</a>
+      <div class="nav-section">Kinh doanh</div>
+      <a href="/admin/don-hang" class="nav-item"><span class="icon"><i class="fa-solid fa-box-open"></i></span> Đơn Hàng</a>
+      <a href="/admin/doanh-thu" class="nav-item"><span class="icon"><i class="fa-solid fa-coins"></i></span> Doanh Thu</a>
+      <div class="nav-section">Hệ thống</div>
+      <a href="/admin/users" class="nav-item"><span class="icon"><i class="fa-solid fa-users"></i></span> Khách Hàng</a>
+      <a href="/admin/quang-cao" class="nav-item"><span class="icon"><i class="fa-solid fa-bullhorn"></i></span> Quảng Cáo</a>
+    </nav>
+    <div class="sidebar-footer"><i class="fa-solid fa-circle" style="color:var(--success);font-size:8px;margin-right:6px"></i> API: /api/admin</div>
+  </aside>
+</div>
 
 <!-- MAIN -->
 <div class="main">
@@ -214,6 +199,9 @@
     <div class="topbar-right">
       <span id="topbar-time" style="font-size:13px;color:var(--muted)"></span>
       <span class="admin-badge">Admin</span>
+      <a href="/logout" class="btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+      </a>
     </div>
   </header>
 
@@ -420,25 +408,28 @@
     </div>
 
   </div><!-- /content -->
+  <!-- FOOTER: th:replace="~{fragments/footerAdmin :: footerAdmin}" -->
+  <div th:replace="~{fragments/footerAdmin :: footerAdmin}">
+    <footer class="footer-admin">
+      <div class="footer-admin__left">
+        <span class="footer-admin__brand">ADMIN</span>
+        <span class="footer-admin__copy">&copy; 2025 Hệ thống quản trị nội bộ.</span>
+      </div>
+      <nav class="footer-admin__nav">
+        <a onclick="showPage('dashboard')">Dashboard</a>
+        <a onclick="showPage('don-hang')">Đơn Hàng</a>
+        <a onclick="showPage('doanh-thu')">Doanh Thu</a>
+        <a onclick="showPage('users')">Khách Hàng</a>
+      </nav>
+      <div class="footer-admin__right">
+        <span class="footer-admin__dot"></span>
+        Hệ thống đang hoạt động &nbsp;&middot;&nbsp; API: <code>/api/admin</code>
+      </div>
+    </footer>
+  </div>
+
 </div><!-- /main -->
 
-<!-- ===== FOOTER MAIN ===== -->
-<footer class="footer-main">
-  <div class="footer-left">
-    <span class="footer-brand">ADMIN</span>
-    <span class="footer-copy">© 2025 Hệ thống quản trị nội bộ. Mọi quyền được bảo lưu.</span>
-  </div>
-  <div class="footer-links">
-    <a onclick="showPage('dashboard')">Dashboard</a>
-    <a onclick="showPage('don-hang')">Đơn Hàng</a>
-    <a onclick="showPage('doanh-thu')">Doanh Thu</a>
-    <a onclick="showPage('users')">Khách Hàng</a>
-  </div>
-  <div class="footer-right">
-    <span class="footer-dot"></span>
-    Hệ thống đang hoạt động &nbsp;·&nbsp; API: <code style="color:var(--accent);font-size:11px">/api/admin</code>
-  </div>
-</footer>
 
 <!-- ===== MODALS ===== -->
 

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Doanh Thu – Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  :root{--bg:#0d0d0d;--surface:#161616;--border:#2a2a2a;--accent:#ff5c00;--accent2:#ffb800;--text:#f0ece4;--muted:#6b6b6b;--success:#22c55e;--danger:#ef4444;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;top:0;left:0;}
+  .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+  .sidebar-logo .brand{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--accent);}
+  .sidebar-logo .sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:2px;}
+  .nav{padding:16px 0;flex:1;overflow-y:auto;}
+  .nav-section{padding:8px 24px 4px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:all .2s;border-left:3px solid transparent;}
+  .nav-item:hover,.nav-item.active{color:var(--text);background:rgba(255,92,0,.08);border-left-color:var(--accent);}
+  .nav-item .icon{font-size:16px;width:20px;text-align:center;}
+  .sidebar-footer{padding:16px 24px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
+  .main{margin-left:240px;display:flex;flex-direction:column;min-height:100vh;}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;}
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .topbar-back{display:flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;padding:6px 12px;border:1px solid var(--border);border-radius:7px;transition:all .2s;}
+  .topbar-back:hover{color:var(--text);border-color:var(--accent);}
+  .topbar-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .admin-badge{background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;}
+  .btn-logout{display:flex;align-items:center;gap:7px;padding:7px 16px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:#ef4444;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;}
+  .btn-logout:hover{background:#ef4444;color:#fff;}
+  .content{padding:32px;flex:1;}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;}
+  .page-heading{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;}
+  .page-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+  /* STAT CARDS */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;position:relative;overflow:hidden;transition:border-color .2s;}
+  .stat-card:hover{border-color:var(--accent);}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .stat-card.c1::before{background:var(--accent2);}
+  .stat-card.c2::before{background:var(--success);}
+  .stat-card.c3::before{background:var(--accent);}
+  .stat-card.c4::before{background:var(--danger);}
+  .stat-icon{font-size:28px;margin-bottom:12px;}
+  .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .stat-value{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;line-height:1;}
+  .stat-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+  /* GRID */
+  .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;}
+  .card-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin-bottom:20px;}
+  /* BAR CHART */
+  .bar-list{display:flex;flex-direction:column;gap:12px;}
+  .bar-item{display:flex;align-items:center;gap:10px;}
+  .bar-key{width:100px;font-size:12px;color:var(--muted);flex-shrink:0;}
+  .bar-track{flex:1;height:22px;background:#222;border-radius:4px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+  .bar-val{width:80px;font-size:13px;font-weight:600;text-align:right;flex-shrink:0;}
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);}
+  td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(255,92,0,.03);}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+  .badge-green{background:rgba(34,197,94,.15);color:var(--success);}
+  .badge-orange{background:rgba(255,92,0,.15);color:var(--accent);}
+  .badge-yellow{background:rgba(255,184,0,.15);color:var(--accent2);}
+  .badge-red{background:rgba(239,68,68,.15);color:var(--danger);}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .footer-admin{background:var(--surface);border-top:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .footer-admin__brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--accent);}
+  .footer-admin__copy{font-size:12px;color:var(--muted);}
+  .footer-admin__nav{display:flex;gap:20px;}
+  .footer-admin__nav a{font-size:12px;color:var(--muted);text-decoration:none;transition:color .2s;}
+  .footer-admin__nav a:hover{color:var(--accent);}
+  .footer-admin__right{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .footer-admin__right code{color:var(--accent);font-size:11px;}
+  .footer-admin__dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<div th:replace="~{fragments/sidebarAdmin :: sidebarAdmin(activePage='doanh-thu')}">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand">ADMIN</div><div class="sub">Quản trị hệ thống</div></div>
+    <nav class="nav">
+      <div class="nav-section">Tổng quan</div>
+      <a href="/admin" class="nav-item"><span class="icon"><i class="fa-solid fa-gauge"></i></span> Dashboard</a>
+      <div class="nav-section">Thực đơn</div>
+      <a href="/admin/food" class="nav-item"><span class="icon"><i class="fa-solid fa-bowl-food"></i></span> Món Ăn</a>
+      <a href="/admin/danh-muc" class="nav-item"><span class="icon"><i class="fa-solid fa-layer-group"></i></span> Danh Mục</a>
+      <div class="nav-section">Kinh doanh</div>
+      <a href="/admin/don-hang" class="nav-item"><span class="icon"><i class="fa-solid fa-box-open"></i></span> Đơn Hàng</a>
+      <a href="/admin/doanh-thu" class="nav-item active"><span class="icon"><i class="fa-solid fa-coins"></i></span> Doanh Thu</a>
+      <div class="nav-section">Hệ thống</div>
+      <a href="/admin/users" class="nav-item"><span class="icon"><i class="fa-solid fa-users"></i></span> Khách Hàng</a>
+      <a href="/admin/quang-cao" class="nav-item"><span class="icon"><i class="fa-solid fa-bullhorn"></i></span> Quảng Cáo</a>
+    </nav>
+    <div class="sidebar-footer"><i class="fa-solid fa-circle" style="color:var(--success);font-size:8px;margin-right:6px"></i> API: /api/admin</div>
+  </aside>
+</div>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="/admin" class="topbar-back"><i class="fa-solid fa-chevron-left"></i> Quay lại</a>
+      <div class="topbar-title"><i class="fa-solid fa-coins" style="color:var(--accent2);margin-right:8px"></i>Báo Cáo Doanh Thu</div>
+    </div>
+    <div class="topbar-right">
+      <span id="topbar-time" style="font-size:13px;color:var(--muted)"></span>
+      <span class="admin-badge">Admin</span>
+      <a href="/logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất</a>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <div class="page-heading">Thống Kê Doanh Thu</div>
+        <div class="page-sub">Tổng hợp doanh thu từ các đơn hàng đã hoàn thành</div>
+      </div>
+      <button class="btn" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px" onclick="loadAll()">
+        <i class="fa-solid fa-rotate-right" style="margin-right:6px"></i>Làm mới
+      </button>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+      <div class="stat-card c1">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Tổng Doanh Thu</div>
+        <div class="stat-value" id="s-total" style="color:var(--accent2)">–</div>
+        <div class="stat-sub">Đơn trạng thái DONE</div>
+      </div>
+      <div class="stat-card c2">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Đơn Hoàn Thành</div>
+        <div class="stat-value" id="s-done" style="color:var(--success)">–</div>
+        <div class="stat-sub">Trạng thái DONE</div>
+      </div>
+      <div class="stat-card c3">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">Đang Xử Lý</div>
+        <div class="stat-value" id="s-pending" style="color:var(--accent)">–</div>
+        <div class="stat-sub">Chưa hoàn thành</div>
+      </div>
+      <div class="stat-card c4">
+        <div class="stat-icon">❌</div>
+        <div class="stat-label">Đã Huỷ</div>
+        <div class="stat-value" id="s-cancel" style="color:var(--danger)">–</div>
+        <div class="stat-sub">Trạng thái CANCELLED</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <!-- CHART THEO TRẠNG THÁI -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-chart-bar" style="color:var(--accent);margin-right:8px"></i>Phân Bổ Theo Trạng Thái</div>
+        <div class="bar-list" id="bar-chart"><div style="color:var(--muted);font-size:13px"><span class="spinner"></span> Đang tải...</div></div>
+      </div>
+
+      <!-- TOP ĐƠN HÀNG -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-trophy" style="color:var(--accent2);margin-right:8px"></i>Top 8 Đơn Hàng Cao Nhất</div>
+        <table>
+          <thead><tr><th>ID</th><th>Tổng Tiền</th><th>Trạng Thái</th></tr></thead>
+          <tbody id="tbl-top"><tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)"><span class="spinner"></span></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BẢNG TẤT CẢ ĐƠN DONE -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px"><i class="fa-solid fa-list-check" style="color:var(--success);margin-right:8px"></i>Tất Cả Đơn Đã Hoàn Thành</div>
+      <table>
+        <thead><tr><th>ID</th><th>Khách Hàng</th><th>Ngày Đặt</th><th style="text-align:right">Tổng Tiền</th><th>Trạng Thái</th></tr></thead>
+        <tbody id="tbl-done"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)"><span class="spinner"></span></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div th:replace="~{fragments/footerAdmin :: footerAdmin}">
+    <footer class="footer-admin">
+      <div style="display:flex;align-items:center;gap:14px"><span class="footer-admin__brand">ADMIN</span><span class="footer-admin__copy">&copy; 2025 Hệ thống quản trị nội bộ.</span></div>
+      <nav class="footer-admin__nav"><a href="/admin">Dashboard</a><a href="/admin/don-hang">Đơn Hàng</a><a href="/admin/users">Khách Hàng</a></nav>
+      <div class="footer-admin__right"><span class="footer-admin__dot"></span> Hệ thống đang hoạt động &nbsp;&middot;&nbsp; API: <code>/api/admin</code></div>
+    </footer>
+  </div>
+</div>
+
+<script>
+const API='/api/admin';
+function updateTime(){const n=new Date();document.getElementById('topbar-time').textContent=n.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+' '+n.toLocaleDateString('vi-VN');}
+setInterval(updateTime,1000);updateTime();
+function fmt(n){return Number(n||0).toLocaleString('vi-VN')+'đ';}
+function statusBadge(s){const m={DONE:'badge-green',PENDING:'badge-orange',CONFIRMED:'badge-yellow',DELIVERING:'badge-yellow',CANCELLED:'badge-red'};return `<span class="badge ${m[s]||'badge-orange'}">${s||'–'}</span>`;}
+
+async function loadAll(){
+  try{
+    const orders=await(await fetch(API+'/don-hang')).json();
+    const done=orders.filter(o=>o.trangThai==='DONE'||o.trangThai==='Đã giao');
+    const pending=orders.filter(o=>!['DONE','CANCELLED','Đã giao','Đã huỷ'].includes(o.trangThai));
+    const cancelled=orders.filter(o=>o.trangThai==='CANCELLED'||o.trangThai==='Đã huỷ');
+    const total=done.reduce((s,o)=>s+(o.tongGia||o.tongTien||0),0);
+
+    document.getElementById('s-total').textContent=fmt(total);
+    document.getElementById('s-done').textContent=done.length;
+    document.getElementById('s-pending').textContent=pending.length;
+    document.getElementById('s-cancel').textContent=cancelled.length;
+
+    // BAR CHART
+    const groups={};
+    orders.forEach(o=>{const k=o.trangThai||'UNKNOWN';groups[k]=(groups[k]||0)+1;});
+    const colors={DONE:'var(--success)',PENDING:'var(--accent)','Chờ xác nhận':'var(--accent)',CONFIRMED:'var(--accent2)','Đã xác nhận':'var(--accent2)',DELIVERING:'#60a5fa','Đang giao':'#60a5fa',CANCELLED:'var(--danger)','Đã huỷ':'var(--danger)'};
+    const max=Math.max(...Object.values(groups),1);
+    document.getElementById('bar-chart').innerHTML=Object.entries(groups).map(([k,v])=>`
+      <div class="bar-item">
+        <div class="bar-key">${k}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${colors[k]||'var(--muted)'}"></div></div>
+        <div class="bar-val" style="color:${colors[k]||'var(--muted)'}">${v}</div>
+      </div>`).join('');
+
+    // TOP 8
+    const top=[...orders].sort((a,b)=>(b.tongGia||b.tongTien||0)-(a.tongGia||a.tongTien||0)).slice(0,8);
+    document.getElementById('tbl-top').innerHTML=top.map((o,i)=>`
+      <tr>
+        <td><b>#${o.id}</b> ${i===0?'🥇':i===1?'🥈':i===2?'🥉':''}</td>
+        <td style="color:var(--accent2);font-weight:700">${fmt(o.tongGia||o.tongTien)}</td>
+        <td>${statusBadge(o.trangThai)}</td>
+      </tr>`).join('');
+
+    // BẢNG DONE
+    document.getElementById('tbl-done').innerHTML=done.length
+      ?done.map(o=>`
+        <tr>
+          <td><b>#${o.id}</b></td>
+          <td>${o.user?.tenKhach||o.user?.hoTen||'–'}</td>
+          <td style="color:var(--muted)">${o.ngayDat?new Date(o.ngayDat).toLocaleDateString('vi-VN'):'–'}</td>
+          <td style="text-align:right;color:var(--accent2);font-weight:700">${fmt(o.tongGia||o.tongTien)}</td>
+          <td>${statusBadge(o.trangThai)}</td>
+        </tr>`).join('')
+      :'<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--muted)">Chưa có đơn hoàn thành</td></tr>';
+  }catch(e){
+    console.error(e);
+    document.getElementById('bar-chart').innerHTML=`<div style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi: ${e.message}</div>`;
+  }
+}
+loadAll();
+</script>
+</body>
+</html>

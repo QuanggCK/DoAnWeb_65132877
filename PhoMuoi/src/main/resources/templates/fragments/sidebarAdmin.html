@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<body>
+
+<!--/*
+  SIDEBAR ADMIN — Thymeleaf Fragment
+  Dùng trong bất kỳ trang admin nào:
+
+    <div th:replace="~{fragments/sidebarAdmin :: sidebarAdmin(activePage='dashboard')}"></div>
+
+  activePage nhận một trong các giá trị:
+    'dashboard' | 'mon-an' | 'danh-muc' | 'don-hang' | 'doanh-thu' | 'users' | 'quang-cao'
+*/-->
+
+<aside th:fragment="sidebarAdmin(activePage)" class="sidebar">
+
+  <div class="sidebar-logo">
+    <div class="brand">ADMIN</div>
+    <div class="sub">Quản trị hệ thống</div>
+  </div>
+
+  <nav class="nav">
+
+    <div class="nav-section">Tổng quan</div>
+    <a href="/admin"
+       th:classappend="${activePage == 'dashboard'} ? 'active'"
+       class="nav-item">
+      <span class="icon"><i class="fa-solid fa-gauge"></i></span> Dashboard
+    </a>
+
+    <div class="nav-section">Thực đơn</div>
+    <a href="/admin/food"
+       th:classappend="${activePage == 'mon-an'} ? 'active'"
+       class="nav-item">
+      <span class="icon"><i class="fa-solid fa-bowl-food"></i></span> Món Ăn
+    </a>
+    <a href="/admin/danh-muc"
+       th:classappend="${activePage == 'danh-muc'} ? 'active'"
+       class="nav-item">
+      <span class="icon"><i class="fa-solid fa-layer-group"></i></span> Danh Mục
+    </a>
+
+    <div class="nav-section">Kinh doanh</div>
+    <a href="/admin/don-hang"
+       th:classappend="${activePage == 'don-hang'} ? 'active'"
+       class="nav-item">
+      <span class="icon"><i class="fa-solid fa-box-open"></i></span> Đơn Hàng
+    </a>
+    <a href="/admin/doanh-thu"
+       th:classappend="${activePage == 'doanh-thu'} ? 'active'"
+       class="nav-item">
+      <span class="icon"><i class="fa-solid fa-coins"></i></span> Doanh Thu
+    </a>
+
+    <div class="nav-section">Hệ thống</div>
+    <a href="/admin/users"
+       th:classappend="${activePage == 'users'} ? 'active'"
+       class="nav-item">
+      <span class="icon"><i class="fa-solid fa-users"></i></span> Khách Hàng
+    </a>
+    <a href="/admin/quang-cao"
+       th:classappend="${activePage == 'quang-cao'} ? 'active'"
+       class="nav-item">
+      <span class="icon"><i class="fa-solid fa-bullhorn"></i></span> Quảng Cáo
+    </a>
+
+  </nav>
+
+  <div class="sidebar-footer">
+    <i class="fa-solid fa-circle" style="color:var(--success);font-size:8px;margin-right:6px"></i>
+    API: /api/admin
+  </div>
+
+</aside>
+
+</body>
+</html>
