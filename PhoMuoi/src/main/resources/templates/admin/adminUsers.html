@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Khách Hàng – Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  :root{--bg:#0d0d0d;--surface:#161616;--border:#2a2a2a;--accent:#ff5c00;--accent2:#ffb800;--text:#f0ece4;--muted:#6b6b6b;--success:#22c55e;--danger:#ef4444;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;top:0;left:0;}
+  .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+  .sidebar-logo .brand{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--accent);}
+  .sidebar-logo .sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:2px;}
+  .nav{padding:16px 0;flex:1;overflow-y:auto;}
+  .nav-section{padding:8px 24px 4px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:all .2s;border-left:3px solid transparent;}
+  .nav-item:hover,.nav-item.active{color:var(--text);background:rgba(255,92,0,.08);border-left-color:var(--accent);}
+  .nav-item .icon{font-size:16px;width:20px;text-align:center;}
+  .sidebar-footer{padding:16px 24px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
+  .main{margin-left:240px;display:flex;flex-direction:column;min-height:100vh;}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;}
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .topbar-back{display:flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;padding:6px 12px;border:1px solid var(--border);border-radius:7px;transition:all .2s;}
+  .topbar-back:hover{color:var(--text);border-color:var(--accent);}
+  .topbar-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .admin-badge{background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;}
+  .btn-logout{display:flex;align-items:center;gap:7px;padding:7px 16px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:#ef4444;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;}
+  .btn-logout:hover{background:#ef4444;color:#fff;}
+  .content{padding:32px;flex:1;}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;}
+  .page-heading{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;}
+  .page-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+  /* STATS */
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+  .stat-mini{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;display:flex;align-items:center;gap:16px;}
+  .stat-mini-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .stat-mini-label{font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .stat-mini-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;}
+  /* TOOLBAR */
+  .toolbar{display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap;}
+  .search-box{flex:1;min-width:220px;max-width:360px;position:relative;}
+  .search-box i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;}
+  .search-box input{width:100%;padding:9px 14px 9px 36px;background:#1e1e1e;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;}
+  .search-box input:focus{border-color:var(--accent);}
+  .filter-select{padding:9px 14px;background:#1e1e1e;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;}
+  .toolbar-count{font-size:13px;color:var(--muted);margin-left:auto;}
+  /* TABLE */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{padding:11px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);white-space:nowrap;}
+  td{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(255,92,0,.03);}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+  .badge-red{background:rgba(239,68,68,.15);color:var(--danger);}
+  .badge-green{background:rgba(34,197,94,.15);color:var(--success);}
+  /* AVATAR */
+  .avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0;}
+  /* MODAL CHI TIẾT */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:480px;max-width:95vw;animation:slideUp .25s ease;}
+  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
+  .modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;}
+  .modal-close:hover{color:var(--text);}
+  .user-detail-header{display:flex;align-items:center;gap:16px;padding:20px;background:#1a1a1a;border-radius:12px;margin-bottom:20px;}
+  .user-detail-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-detail-name{font-weight:700;font-size:18px;}
+  .user-detail-role{font-size:12px;margin-top:4px;}
+  .detail-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .detail-row:last-child{border-bottom:none;}
+  .detail-icon{width:32px;height:32px;background:#222;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);flex-shrink:0;}
+  .detail-label{font-size:11px;color:var(--muted);margin-bottom:2px;}
+  .detail-val{font-size:14px;font-weight:500;}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-row td,.empty-row td{text-align:center;padding:36px;color:var(--muted);}
+  .btn-view{padding:6px 12px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:600;background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.3);border-radius:6px;cursor:pointer;transition:all .2s;}
+  .btn-view:hover{background:#60a5fa;color:#000;}
+  .footer-admin{background:var(--surface);border-top:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .footer-admin__brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--accent);}
+  .footer-admin__copy{font-size:12px;color:var(--muted);}
+  .footer-admin__nav{display:flex;gap:20px;}
+  .footer-admin__nav a{font-size:12px;color:var(--muted);text-decoration:none;transition:color .2s;}
+  .footer-admin__nav a:hover{color:var(--accent);}
+  .footer-admin__right{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .footer-admin__right code{color:var(--accent);font-size:11px;}
+  .footer-admin__dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<div th:replace="~{fragments/sidebarAdmin :: sidebarAdmin(activePage='users')}">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand">ADMIN</div><div class="sub">Quản trị hệ thống</div></div>
+    <nav class="nav">
+      <div class="nav-section">Tổng quan</div>
+      <a href="/admin" class="nav-item"><span class="icon"><i class="fa-solid fa-gauge"></i></span> Dashboard</a>
+      <div class="nav-section">Thực đơn</div>
+      <a href="/admin/food" class="nav-item"><span class="icon"><i class="fa-solid fa-bowl-food"></i></span> Món Ăn</a>
+      <a href="/admin/danh-muc" class="nav-item"><span class="icon"><i class="fa-solid fa-layer-group"></i></span> Danh Mục</a>
+      <div class="nav-section">Kinh doanh</div>
+      <a href="/admin/don-hang" class="nav-item"><span class="icon"><i class="fa-solid fa-box-open"></i></span> Đơn Hàng</a>
+      <a href="/admin/doanh-thu" class="nav-item"><span class="icon"><i class="fa-solid fa-coins"></i></span> Doanh Thu</a>
+      <div class="nav-section">Hệ thống</div>
+      <a href="/admin/users" class="nav-item active"><span class="icon"><i class="fa-solid fa-users"></i></span> Khách Hàng</a>
+      <a href="/admin/quang-cao" class="nav-item"><span class="icon"><i class="fa-solid fa-bullhorn"></i></span> Quảng Cáo</a>
+    </nav>
+    <div class="sidebar-footer"><i class="fa-solid fa-circle" style="color:var(--success);font-size:8px;margin-right:6px"></i> API: /api/admin</div>
+  </aside>
+</div>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="/admin" class="topbar-back"><i class="fa-solid fa-chevron-left"></i> Quay lại</a>
+      <div class="topbar-title"><i class="fa-solid fa-users" style="color:var(--accent);margin-right:8px"></i>Quản Lý Khách Hàng</div>
+    </div>
+    <div class="topbar-right">
+      <span id="topbar-time" style="font-size:13px;color:var(--muted)"></span>
+      <span class="admin-badge">Admin</span>
+      <a href="/logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất</a>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <div class="page-heading">Danh Sách Khách Hàng</div>
+        <div class="page-sub">Tất cả tài khoản đã đăng ký trong hệ thống</div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-mini">
+        <div class="stat-mini-icon" style="background:rgba(255,92,0,.12)"><i class="fa-solid fa-users" style="color:var(--accent)"></i></div>
+        <div><div class="stat-mini-label">Tổng Tài Khoản</div><div class="stat-mini-val" id="s-total">–</div></div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-icon" style="background:rgba(34,197,94,.12)"><i class="fa-solid fa-user" style="color:var(--success)"></i></div>
+        <div><div class="stat-mini-label">Khách Hàng</div><div class="stat-mini-val" id="s-users" style="color:var(--success)">–</div></div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-icon" style="background:rgba(239,68,68,.12)"><i class="fa-solid fa-user-shield" style="color:var(--danger)"></i></div>
+        <div><div class="stat-mini-label">Quản Trị Viên</div><div class="stat-mini-val" id="s-admins" style="color:var(--danger)">–</div></div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="Tìm tên, SĐT..." oninput="filterTable()"/>
+      </div>
+      <select class="filter-select" id="filter-role" onchange="filterTable()">
+        <option value="">Tất cả vai trò</option>
+        <option value="admin">Quản trị viên</option>
+        <option value="user">Khách hàng</option>
+      </select>
+      <span class="toolbar-count" id="toolbar-count"></span>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Khách Hàng</th>
+            <th>Số Điện Thoại</th>
+            <th>Địa Chỉ</th>
+            <th>Vai Trò</th>
+            <th style="text-align:center">Chi Tiết</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body">
+          <tr class="loading-row"><td colspan="6"><span class="spinner"></span> Đang tải...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div th:replace="~{fragments/footerAdmin :: footerAdmin}">
+    <footer class="footer-admin">
+      <div style="display:flex;align-items:center;gap:14px"><span class="footer-admin__brand">ADMIN</span><span class="footer-admin__copy">&copy; 2025 Hệ thống quản trị nội bộ.</span></div>
+      <nav class="footer-admin__nav"><a href="/admin">Dashboard</a><a href="/admin/don-hang">Đơn Hàng</a><a href="/admin/doanh-thu">Doanh Thu</a></nav>
+      <div class="footer-admin__right"><span class="footer-admin__dot"></span> Hệ thống đang hoạt động &nbsp;&middot;&nbsp; API: <code>/api/admin</code></div>
+    </footer>
+  </div>
+</div>
+
+<!-- MODAL CHI TIẾT USER -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Chi Tiết Khách Hàng</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const API='/api/admin';
+let allData=[];
+const COLORS=['#ff5c00','#22c55e','#ffb800','#60a5fa','#a78bfa','#f472b6','#34d399','#fb923c'];
+
+function updateTime(){const n=new Date();document.getElementById('topbar-time').textContent=n.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+' '+n.toLocaleDateString('vi-VN');}
+setInterval(updateTime,1000);updateTime();
+
+function avatarColor(name){let h=0;for(let c of(name||'A'))h=c.charCodeAt(0)+h*31;return COLORS[Math.abs(h)%COLORS.length];}
+function initial(name){return(name||'?')[0].toUpperCase();}
+
+async function loadAll(){
+  try{
+    allData=await(await fetch(API+'/users')).json();
+    const admins=allData.filter(u=>u.roleAdmin===true);
+    const users=allData.filter(u=>u.roleAdmin!==true);
+    document.getElementById('s-total').textContent=allData.length;
+    document.getElementById('s-users').textContent=users.length;
+    document.getElementById('s-admins').textContent=admins.length;
+    renderTable(allData);
+  }catch(e){
+    document.getElementById('tbl-body').innerHTML=`<tr class="empty-row"><td colspan="6"><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> Lỗi: ${e.message}</td></tr>`;
+  }
+}
+
+function renderTable(data){
+  document.getElementById('toolbar-count').textContent=data.length+' tài khoản';
+  if(!data.length){
+    document.getElementById('tbl-body').innerHTML='<tr class="empty-row"><td colspan="6"><i class="fa-solid fa-users" style="font-size:28px;color:var(--border)"></i><br>Không tìm thấy tài khoản</td></tr>';
+    return;
+  }
+  document.getElementById('tbl-body').innerHTML=data.map((u,i)=>{
+    const name=u.tenKhach||u.hoTen||'–';
+    const isAdmin=u.roleAdmin===true;
+    const color=avatarColor(name);
+    return `<tr>
+      <td style="color:var(--muted);font-size:12px">${i+1}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="avatar" style="background:${color}">${initial(name)}</div>
+          <div>
+            <div style="font-weight:600">${name}</div>
+            <div style="font-size:11px;color:var(--muted)">ID: ${u.userId||u.id}</div>
+          </div>
+        </div>
+      </td>
+      <td><i class="fa-solid fa-phone" style="color:var(--muted);margin-right:6px;font-size:12px"></i>${u.sdt||'–'}</td>
+      <td style="color:var(--muted);font-size:13px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.diaChi||'–'}</td>
+      <td>${isAdmin?'<span class="badge badge-red"><i class="fa-solid fa-shield-halved" style="margin-right:4px"></i>Admin</span>':'<span class="badge badge-green"><i class="fa-solid fa-user" style="margin-right:4px"></i>Khách hàng</span>'}</td>
+      <td style="text-align:center">
+        <button class="btn-view" onclick='showDetail(${JSON.stringify(u).replace(/"/g,"&quot;")})'>
+          <i class="fa-solid fa-eye"></i> Xem
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const role=document.getElementById('filter-role').value;
+  const filtered=allData.filter(u=>{
+    const name=(u.tenKhach||u.hoTen||'').toLowerCase();
+    const sdt=(u.sdt||'').toLowerCase();
+    const matchQ=!q||name.includes(q)||sdt.includes(q);
+    const isAdmin=u.roleAdmin===true;
+    const matchRole=!role||(role==='admin'&&isAdmin)||(role==='user'&&!isAdmin);
+    return matchQ&&matchRole;
+  });
+  renderTable(filtered);
+}
+
+function showDetail(u){
+  const name=u.tenKhach||u.hoTen||'–';
+  const isAdmin=u.roleAdmin===true;
+  const color=avatarColor(name);
+  document.getElementById('modal-body').innerHTML=`
+    <div class="user-detail-header">
+      <div class="user-detail-avatar" style="background:${color}">${initial(name)}</div>
+      <div>
+        <div class="user-detail-name">${name}</div>
+        <div class="user-detail-role">${isAdmin?'<span class="badge badge-red"><i class="fa-solid fa-shield-halved" style="margin-right:4px"></i>Quản trị viên</span>':'<span class="badge badge-green"><i class="fa-solid fa-user" style="margin-right:4px"></i>Khách hàng</span>'}</div>
+      </div>
+    </div>
+    <div class="detail-row"><div class="detail-icon"><i class="fa-solid fa-id-badge"></i></div><div><div class="detail-label">ID</div><div class="detail-val">#${u.userId||u.id}</div></div></div>
+    <div class="detail-row"><div class="detail-icon"><i class="fa-solid fa-phone"></i></div><div><div class="detail-label">Số điện thoại</div><div class="detail-val">${u.sdt||'Chưa cập nhật'}</div></div></div>
+    <div class="detail-row"><div class="detail-icon"><i class="fa-solid fa-location-dot"></i></div><div><div class="detail-label">Địa chỉ</div><div class="detail-val">${u.diaChi||'Chưa cập nhật'}</div></div></div>
+    <div class="detail-row"><div class="detail-icon"><i class="fa-solid fa-image"></i></div><div><div class="detail-label">Ảnh đại diện</div><div class="detail-val">${u.anh?`<img src="${u.anh}" style="height:40px;border-radius:6px" onerror="this.outerHTML='Không có ảnh'">`:'Chưa cập nhật'}</div></div></div>`;
+  document.getElementById('modal-detail').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modal-detail').classList.remove('open');}
+document.getElementById('modal-detail').addEventListener('click',e=>{if(e.target.id==='modal-detail')closeModal();});
+loadAll();
+</script>
+</body>
+</html>
