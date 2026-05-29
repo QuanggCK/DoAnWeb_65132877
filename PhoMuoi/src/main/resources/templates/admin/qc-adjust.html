@@ -31,7 +31,9 @@
       display: flex;
     }
 
-    /* BỘ CSS SIDEBAR ADMIN ĐỒNG BỘ DARK MODE */
+    /* ==========================================
+       BỘ CSS SIDEBAR ĐỒNG BỘ TỪ ADMINPAGE
+       ========================================== */
     .sidebar {
       width: 240px;
       background: var(--surface);
@@ -40,28 +42,30 @@
       flex-direction: column;
       position: fixed;
       height: 100vh;
+      z-index: 100;
       left: 0;
       top: 0;
-      z-index: 100;
     }
     .sidebar-logo {
-      padding: 24px;
+      padding: 30px 24px;
       border-bottom: 1px solid var(--border);
     }
     .sidebar-logo .brand {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 24px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1.5px;
       color: var(--accent);
-      letter-spacing: 1px;
+      line-height: 1;
     }
     .sidebar-logo .sub {
       font-size: 11px;
-      color: var(--muted);
       text-transform: uppercase;
-      margin-top: 2px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-top: 4px;
     }
     .nav {
-      padding: 20px 14px;
+      padding: 24px 16px;
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -70,38 +74,64 @@
     }
     .nav-section {
       font-size: 11px;
-      font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 1px;
       color: var(--muted);
-      padding: 12px 12px 6px;
-      letter-spacing: 0.5px;
+      padding: 16px 8px 8px 8px;
+      font-weight: 600;
     }
+    .nav-section:first-child { padding-top: 0; }
     .nav-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       color: var(--text);
       text-decoration: none;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 500;
-      border-radius: 6px;
-      transition: 0.2s;
-    }
-    .nav-item:hover {
-      background: rgba(255, 92, 0, 0.05);
-      color: var(--accent);
-    }
-    .nav-item.active {
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
+      transition: all 0.2s ease;
     }
     .nav-item .icon {
       width: 20px;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      color: var(--muted);
       font-size: 16px;
+      transition: color 0.2s ease;
     }
+    .nav-item:hover {
+      background: #1e1e1e;
+      color: #fff;
+    }
+    .nav-item:hover .icon {
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: linear-gradient(135deg, #ff5c00 0%, #ff3d00 100%);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(255, 92, 0, 0.2);
+    }
+    .nav-item.active .icon {
+      color: #fff;
+    }
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--danger);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .btn-logout:hover { opacity: 0.8; }
 
     /* Main Content Style */
     .main-content {

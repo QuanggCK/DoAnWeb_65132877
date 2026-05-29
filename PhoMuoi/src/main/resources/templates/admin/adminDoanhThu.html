@@ -21,17 +21,107 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; }
 
-    /* ── SIDEBAR ── */
-    .sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; top: 0; left: 0; }
-    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
-    .sidebar-logo .brand { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); }
-    .sidebar-logo .sub { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-top: 2px; }
-    .nav { padding: 16px 0; flex: 1; overflow-y: auto; }
-    .nav-section { padding: 8px 24px 4px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
-    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all .2s; border-left: 3px solid transparent; }
-    .nav-item:hover, .nav-item.active { color: var(--text); background: rgba(255, 92, 0, 0.08); border-left-color: var(--accent); }
-    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-    .sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+    /* ==========================================
+       BỘ CSS SIDEBAR ĐỒNG BỘ TỪ ADMINPAGE
+       ========================================== */
+    .sidebar {
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+      top: 0;
+      left: 0;
+    }
+    .sidebar-logo {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo .brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .sidebar-logo .sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .nav {
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .nav-section {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 16px 8px 8px 8px;
+      font-weight: 600;
+    }
+    .nav-section:first-child { padding-top: 0; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .nav-item .icon {
+      width: 20px;
+      display: flex;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 16px;
+      transition: color 0.2s ease;
+    }
+    .nav-item:hover {
+      background: #1e1e1e;
+      color: #fff;
+    }
+    .nav-item:hover .icon {
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: linear-gradient(135deg, #ff5c00 0%, #ff3d00 100%);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(255, 92, 0, 0.2);
+    }
+    .nav-item.active .icon {
+      color: #fff;
+    }
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--danger);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .btn-logout:hover { opacity: 0.8; }
 
     /* ── MAIN LAYOUT ── */
     .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
@@ -90,28 +180,45 @@
 </head>
 <body>
 
-  <div class="sidebar">
-    <div class="sidebar-logo">
-      <div class="brand">GALAXY KITCHEN</div>
-      <div class="sub">Hệ thống quản trị</div>
-    </div>
-    <div class="nav">
-      <div class="nav-section">Tổng quan</div>
-      <a th:href="@{/admin}" class="nav-item"><i class="fa-solid fa-chart-pie icon"></i>Bảng điều khiển</a>
-      <a th:href="@{/admin/doanh-thu}" class="nav-item active"><i class="fa-solid fa-wallet icon"></i>Doanh thu</a>
-      
-      <div class="nav-section">Quản lý cửa hàng</div>
-      <a th:href="@{/admin/danh-muc}" class="nav-item"><i class="fa-solid fa-layer-group icon"></i>Danh mục</a>
-      <a th:href="@{/admin/food}" class="nav-item"><i class="fa-solid fa-utensils icon"></i>Món ăn</a>
-      <a th:href="@{/admin/don-hang}" class="nav-item"><i class="fa-solid fa-clipboard-list icon"></i>Đơn hàng</a>
-      
-      <div class="nav-section">Hệ thống</div>
-      <a th:href="@{/admin/users}" class="nav-item"><i class="fa-solid fa-users icon"></i>Khách hàng</a>
-      <a th:href="@{/admin/quang-cao}" class="nav-item"><i class="fa-solid fa-rectangle-ad icon"></i>Quảng cáo</a>
-    </div>
-    <div class="sidebar-footer">
-      <span>Thực hiện bởi CLC65</span>
-    </div>
+  <div th:replace="~{fragments/sidebarAdmin :: sidebarAdmin(activePage='doanh-thu')}">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="brand">ADMIN</div>
+        <div class="sub">Quản trị hệ thống</div>
+      </div>
+      <nav class="nav">
+        <div class="nav-section">Tổng quan</div>
+        <a href="/admin" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-gauge"></i></span> Dashboard
+        </a>
+        <div class="nav-section">Thực đơn</div>
+        <a href="/admin/food" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-bowl-food"></i></span> Món Ăn
+        </a>
+        <a href="/admin/danh-muc" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-layer-group"></i></span> Danh Mục
+        </a>
+        <div class="nav-section">Kinh doanh</div>
+        <a href="/admin/don-hang" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-box-open"></i></span> Đơn Hàng
+        </a>
+        <a href="/admin/doanh-thu" class="nav-item active">
+          <span class="icon"><i class="fa-solid fa-coins"></i></span> Doanh Thu
+        </a>
+        <div class="nav-section">Hệ thống</div>
+        <a href="/admin/users" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-users"></i></span> Khách Hàng
+        </a>
+        <a href="/admin/quang-cao" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-rectangle-ad"></i></span> Quảng Cáo
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/logout" class="btn-logout">
+          <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+        </a>
+      </div>
+    </aside>
   </div>
 
   <div class="main">

@@ -97,7 +97,7 @@ public class AdminController {
     @GetMapping("/admin/quang-cao/adjust")
     public String adminQuangCaoAdjustPage(jakarta.servlet.http.HttpSession session) {
         if (!isAdmin(session)) return "redirect:/login";
-        return "qc-adjust";
+        return "admin/qc-adjust";
     }
  
     // =====================================================

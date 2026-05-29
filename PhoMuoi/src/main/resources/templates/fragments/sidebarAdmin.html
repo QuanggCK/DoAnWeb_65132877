@@ -61,14 +61,15 @@
     <a href="/admin/quang-cao"
        th:classappend="${activePage == 'quang-cao'} ? 'active'"
        class="nav-item">
-      <span class="icon"><i class="fa-solid fa-bullhorn"></i></span> Quảng Cáo
+      <span class="icon"><i class="fa-solid fa-rectangle-ad"></i></span> Quảng Cáo
     </a>
 
   </nav>
 
   <div class="sidebar-footer">
-    <i class="fa-solid fa-circle" style="color:var(--success);font-size:8px;margin-right:6px"></i>
-    API: /api/admin
+    <a href="/logout" class="btn-logout">
+      <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+    </a>
   </div>
 
 </aside>

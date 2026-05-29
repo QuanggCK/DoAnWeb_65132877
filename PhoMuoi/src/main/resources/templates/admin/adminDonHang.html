@@ -23,14 +23,105 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
 
-  /* ── SIDEBAR ── */
-  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:10;}
-  .sidebar .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);letter-spacing:1px;padding:25px 20px;border-bottom:1px solid var(--border);text-align:center;}
-  .nav-menu{display:flex;flex-direction:column;padding:15px 10px;gap:5px;flex:1;}
-  .nav-menu a{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none;padding:12px 15px;border-radius:6px;font-size:14px;font-weight:500;transition:0.2s;}
-  .nav-menu a:hover{background:rgba(255,92,0,0.08);color:var(--accent);}
-  .nav-menu a.active{background:var(--accent);color:#fff;font-weight:600;}
-  .nav-menu a i{width:18px;font-size:16px;text-align:center;}
+  /* ==========================================
+     BỘ CSS SIDEBAR ĐỒNG BỘ TỪ ADMINPAGE
+     ========================================== */
+  .sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+  }
+  .sidebar-logo {
+    padding: 30px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .sidebar-logo .sub {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .nav {
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .nav-section {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    padding: 16px 8px 8px 8px;
+    font-weight: 600;
+  }
+  .nav-section:first-child { padding-top: 0; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .nav-item .icon {
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 16px;
+    transition: color 0.2s ease;
+  }
+  .nav-item:hover {
+    background: #1e1e1e;
+    color: #fff;
+  }
+  .nav-item:hover .icon {
+    color: var(--text);
+  }
+  .nav-item.active {
+    background: linear-gradient(135deg, #ff5c00 0%, #ff3d00 100%);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 92, 0, 0.2);
+  }
+  .nav-item.active .icon {
+    color: #fff;
+  }
+  .sidebar-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--danger);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+  .btn-logout:hover { opacity: 0.8; }
 
   /* ── MAIN CONTENT ── */
   .main-content{flex:1;margin-left:240px;padding:30px;min-height:100vh;display:flex;flex-direction:column;}
@@ -87,18 +178,45 @@
 </head>
 <body>
 
-  <div class="sidebar">
-    <div class="logo">ANGEL MENU</div>
-    <nav class="nav-menu">
-      <a th:href="@{/admin}"><i class="fa-solid fa-chart-pie"></i> Tổng quan</a>
-      <a th:href="@{/admin/food}"><i class="fa-solid fa-utensils"></i> Món ăn</a>
-      <a th:href="@{/admin/danh-muc}"><i class="fa-solid fa-list"></i> Danh mục</a>
-      <a th:href="@{/admin/don-hang}" class="active"><i class="fa-solid fa-clipboard-list"></i> Đơn hàng</a>
-      <a th:href="@{/admin/doanh-thu}"><i class="fa-solid fa-wallet"></i> Doanh thu</a>
-      <a th:href="@{/admin/users}"><i class="fa-solid fa-users"></i> Khách hàng</a>
-      <a th:href="@{/admin/quang-cao}"><i class="fa-solid fa-rectangle-ad"></i> Quảng cáo</a>
-      <a th:href="@{/}" style="margin-top:auto; border-top:1px solid var(--border);"><i class="fa-solid fa-house"></i> Về trang chủ</a>
-    </nav>
+  <div th:replace="~{fragments/sidebarAdmin :: sidebarAdmin(activePage='don-hang')}">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="brand">ADMIN</div>
+        <div class="sub">Quản trị hệ thống</div>
+      </div>
+      <nav class="nav">
+        <div class="nav-section">Tổng quan</div>
+        <a href="/admin" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-gauge"></i></span> Dashboard
+        </a>
+        <div class="nav-section">Thực đơn</div>
+        <a href="/admin/food" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-bowl-food"></i></span> Món Ăn
+        </a>
+        <a href="/admin/danh-muc" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-layer-group"></i></span> Danh Mục
+        </a>
+        <div class="nav-section">Kinh doanh</div>
+        <a href="/admin/don-hang" class="nav-item active">
+          <span class="icon"><i class="fa-solid fa-box-open"></i></span> Đơn Hàng
+        </a>
+        <a href="/admin/doanh-thu" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-coins"></i></span> Doanh Thu
+        </a>
+        <div class="nav-section">Hệ thống</div>
+        <a href="/admin/users" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-users"></i></span> Khách Hàng
+        </a>
+        <a href="/admin/quang-cao" class="nav-item">
+          <span class="icon"><i class="fa-solid fa-rectangle-ad"></i></span> Quảng Cáo
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/logout" class="btn-logout">
+          <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+        </a>
+      </div>
+    </aside>
   </div>
 
   <div class="main-content">
