@@ -251,13 +251,14 @@
                 <div class="card-body-custom">
 
                     <div class="food-img-wrapper">
-                        <img th:if="${mon.hinhAnh != null and mon.hinhAnh != ''}"
-                             th:src="@{/images/mon-an/{h}(h=${mon.hinhAnh})}"
-                             th:alt="${mon.tenMon}">
-                        <img th:if="${mon.hinhAnh == null or mon.hinhAnh == ''}"
-                             th:src="@{/images/profiles/dish.png}"
-                             alt="Ảnh mặc định">
-                    </div>
+					    <img th:if="${mon.hinhAnh != null and mon.hinhAnh != ''}"
+					         th:src="@{/images/food-img/{h}(h=${mon.hinhAnh})}"
+					         th:alt="${mon.tenMon}">
+					         
+					    <img th:if="${mon.hinhAnh == null or mon.hinhAnh == ''}"
+					         th:src="@{/images/profiles/dish.png}"
+					         alt="Ảnh mặc định">
+					</div>
 
                     <div class="food-info">
                         <p class="food-name" th:text="${mon.tenMon}">Tên món ăn</p>

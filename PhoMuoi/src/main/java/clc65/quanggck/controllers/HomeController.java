@@ -161,11 +161,11 @@ public class HomeController {
             @RequestParam("tenKhach") String tenKhach,
             @RequestParam("sdt") String sdt,
             @RequestParam("diaChi") String diaChi,
-            @RequestParam("anhProfile") MultipartFile anhProfile,
+            @RequestParam(value = "anhProfile", required = false) MultipartFile anhProfile, // Thêm required = false để tránh lỗi 400 khi không chọn ảnh
             HttpSession session,
-            RedirectAttributes redirectAttributes) { // SỬA: Đã xóa tham số 'HttpServletRequest request' không dùng đến
+            RedirectAttributes redirectAttributes) { 
 
-        // SỬA: Đồng bộ lấy dữ liệu từ 'userLogin'
+        // Đồng bộ lấy dữ liệu từ 'userLogin'
         User currentUser = (User) session.getAttribute("userLogin");
         if (currentUser == null) return "redirect:/login";
 
@@ -176,9 +176,11 @@ public class HomeController {
                 userDb.setSdt(sdt);
                 userDb.setDiaChi(diaChi);
 
+                // Xử lý lưu ảnh nếu người dùng có upload ảnh mới
                 if (anhProfile != null && !anhProfile.isEmpty()) {
-                    // Mẹo lưu trữ: Nếu chưa cấu hình Resource Mapping, hãy lưu tạm vào thư mục static của Project để hiển thị được ảnh ngay
-                    String folderPath = "src/main/resources/static/images/profiles/";
+                    
+                    // SỬA 1: Sử dụng thư mục tuyệt đối bên ngoài project giống hệt cấu hình WebConfig
+                    String folderPath = System.getProperty("user.home") + "/phomuoi-uploads/profiles/";
                     
                     File folder = new File(folderPath);
                     if (!folder.exists()) {
@@ -187,8 +189,11 @@ public class HomeController {
 
                     String fileName = System.currentTimeMillis() + "_" + anhProfile.getOriginalFilename();
                     File destFile = new File(folder, fileName);
-                    anhProfile.transferTo(destFile);
                     
+                    // SỬA 2: Bắt buộc dùng getAbsoluteFile() để không bị ném vào thư mục Temp rác của Tomcat
+                    anhProfile.transferTo(destFile.getAbsoluteFile());
+                    
+                    // Lưu tên file vào database
                     userDb.setAnh(fileName);
                 }
 
@@ -201,7 +206,7 @@ public class HomeController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("messageError", "Lỗi khi tải ảnh!");
+            redirectAttributes.addFlashAttribute("messageError", "Lỗi khi tải ảnh: " + e.getMessage());
         }
 
         return "redirect:/tai-khoan";

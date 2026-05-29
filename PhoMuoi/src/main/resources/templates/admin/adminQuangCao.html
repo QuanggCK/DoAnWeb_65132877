@@ -350,9 +350,11 @@
         const status = x.trangThai !== undefined ? x.trangThai : x.trangthai;
 
         let imgSrc = '<div class="thumb" style="display:flex;align-items:center;justify-content:center;background:var(--border);color:var(--muted);font-size:10px">NO IMG</div>';
-        if(image) {
-            const path = image.includes('_') ? '/images/announcements/' : '/images/quang-cao/';
-            imgSrc = `<img src="/images/${image}" class="thumb" alt="IMG" onerror="this.onerror=null; this.src='${path}${image}'; this.onerror=function(){this.src='/images/announcements/${image}'}"/>`;
+        if (image) {
+            // Đảm bảo đường dẫn luôn bắt đầu với thư mục /images/quang-cao/
+            let exactPath = image.startsWith('/') ? image : ('/images/quang-cao/' + image);
+            // Xóa bỏ hàm onerror lồng nhau phức tạp, nếu lỗi thì chỉ gán 1 ảnh mặc định duy nhất
+            imgSrc = `<img src="${exactPath}" class="thumb" alt="IMG" onerror="this.onerror=null; this.src='/images/no-image.png';"/>`;
         }
         
         return `

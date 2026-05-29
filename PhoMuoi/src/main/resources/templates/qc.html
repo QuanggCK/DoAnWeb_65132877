@@ -118,15 +118,11 @@
             <div class="col" th:each="qc : ${dsQuangCao}">
                 <div class="qc-card">
                     
-                    <div class="qc-img-wrapper">
-                        <span class="qc-badge">ĐANG DIỄN RA</span>
-                        <img th:if="${qc.hinhAnh != null and qc.hinhAnh != ''}"
-     						 th:src="${#strings.contains(qc.hinhAnh, '_')} ? @{/images/announcements/{h}(h=${qc.hinhAnh})} : @{/images/quang-cao/{h}(h=${qc.hinhAnh})}"
-     						 th:alt="${qc.tieuDe}">
-                        <img th:if="${qc.hinhAnh == null or qc.hinhAnh == ''}"
-                             th:src="@{/images/profiles/dish.png}"
-                             alt="Ảnh mặc định PhoMuoi">
-                    </div>
+                    <div class="qc-img-wrapper" style="position: relative; overflow: hidden; border-radius: 16px 16px 0 0; height: 240px;">
+					    <span class="qc-badge">ĐANG DIỄN RA</span>
+					    
+							<img th:src="@{/images/{name}(name=${qc.hinhAnh})}" class="card-img-top" alt="Ảnh quảng cáo">
+					</div>
                     
 	                    <div class="qc-body">
 	    					<h4 class="qc-title" th:text="${qc.tieuDe}">Tiêu đề chương trình</h4>

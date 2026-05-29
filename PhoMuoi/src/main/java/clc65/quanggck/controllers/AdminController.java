@@ -218,11 +218,10 @@ public class AdminController {
     @PutMapping("/api/admin/don-hang/{orderId}/trang-thai")
     @ResponseBody
     public ResponseEntity<DonHang> updateTrangThaiDonHang(
-            @PathVariable Integer orderId,
-            @RequestParam String trangThaiMoi) {
+            @PathVariable("orderId") Integer orderId,
+            @RequestParam("trangThaiMoi") String trangThaiMoi) { 
         return ResponseEntity.ok(donHangService.updateTrangThai(orderId, trangThaiMoi));
     }
- 
     // ----- QUẢN LÝ KHÁCH HÀNG -----
  
     @GetMapping("/api/admin/users")
@@ -274,6 +273,8 @@ public class AdminController {
     }
 
     // ----- REST UPLOAD API -----
+ // ----- REST UPLOAD API -----
+ // ----- REST UPLOAD API -----
     @PostMapping("/api/admin/upload")
     @ResponseBody
     public ResponseEntity<java.util.Map<String, String>> uploadFile(
@@ -286,23 +287,48 @@ public class AdminController {
                 return ResponseEntity.badRequest().body(response);
             }
             String fileName = file.getOriginalFilename();
-            String folderPath = "src/main/resources/static/images/";
+            
+            // Lấy đường dẫn tuyệt đối tới thư mục static/images gốc của dự án
+            String rootPath = System.getProperty("user.dir");
+            String folderPath = rootPath + "/src/main/resources/static/images/";
+
+            // [XỬ LÝ ĐƯỜNG DẪN Ổ CỨNG] Phân loại thư mục lưu trữ theo đúng yêu cầu của bạn
             if ("food".equalsIgnoreCase(type)) {
                 folderPath += "food-img/";
+            } else if ("profile".equalsIgnoreCase(type)) {
+                folderPath += "profiles/";
+            } else if ("ad".equalsIgnoreCase(type)) {
+                // Ảnh quảng cáo ở thư mục images thôi, giữ nguyên folderPath gốc
             }
+
+            // Tạo thư mục nếu chưa tồn tại
             File folder = new File(folderPath);
             if (!folder.exists()) {
                 folder.mkdirs();
             }
+
+            // Lưu file vào ổ đĩa
             File destFile = new File(folder, fileName);
-            file.transferTo(destFile);
-            
+            file.transferTo(destFile.getAbsoluteFile()); // getAbsoluteFile() để tránh lỗi thư mục tạm trên Spring Boot 3
+
             response.put("fileName", fileName);
-            response.put("filePath", "food".equalsIgnoreCase(type) ? "/images/food-img/" + fileName : "/images/" + fileName);
+
+            // [XỬ LÝ ĐƯỜNG DẪN WEB] Trả về filePath hiển thị tương ứng cho giao diện hiển thị
+            String webPath = "/images/" + fileName;
+            if ("food".equalsIgnoreCase(type)) {
+                webPath = "/images/food-img/" + fileName;
+            } else if ("profile".equalsIgnoreCase(type)) {
+                webPath = "/images/profiles/" + fileName;
+            } else if ("ad".equalsIgnoreCase(type)) {
+                webPath = "/images/" + fileName;
+            }
+            
+            response.put("filePath", webPath);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+            
+        } catch (Exception e) { 
             response.put("error", e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }
-}
+} 

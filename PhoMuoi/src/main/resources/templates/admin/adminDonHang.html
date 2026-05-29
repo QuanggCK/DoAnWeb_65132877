@@ -344,7 +344,7 @@
       // 2. Tìm kiếm theo mã ID hoặc tên khách hàng
       if (searchVal) {
         filtered = filtered.filter(o => {
-          const orderId = String(o.id).toLowerCase();
+          const orderId = String(o.orderId).toLowerCase();
           const customerName = o.user && (o.user.hoTen || o.user.tenKhach) ? (o.user.hoTen || o.user.tenKhach).toLowerCase() : 'khách vãng lai';
           return orderId.includes(searchVal) || customerName.includes(searchVal);
         });
@@ -363,7 +363,7 @@
 
         return `
           <tr>
-            <td><b>#${order.id}</b></td>
+            <td><b>#${order.orderId}</b></td>
             <td>
               <div style="font-weight:600; color:#fff;">${tenKhach}</div>
               <div style="font-size:12px; color:var(--muted); margin-top:2px;">${order.user?.sdt || order.user?.username || ''}</div>
@@ -402,7 +402,10 @@
         const response = await fetch(url, { method: 'PUT' });
         
         if (!response.ok) throw new Error(await response.text() || 'Cập nhật thất bại');
-        
+        if (!orderId || orderId === 'undefined') {
+            showToast('Lỗi: Mã đơn hàng không hợp lệ (undefined)! Hãy kiểm tra lại tên trường ID.', 'error');
+            return;
+          }
         showToast(`Cập nhật trạng thái Đơn hàng #${orderId} thành công!`, 'success');
         
         // Refresh lại dữ liệu ngầm để cập nhật các ô thống kê

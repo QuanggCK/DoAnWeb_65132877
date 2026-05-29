@@ -133,13 +133,14 @@
                     <div class="dish-card">
 
                         <div class="dish-img">
-                            <img th:if="${mon.hinhAnh != null and mon.hinhAnh != ''}"
-                                 th:src="@{/images/mon-an/{h}(h=${mon.hinhAnh})}"
-                                 th:alt="${mon.tenMon}">
-                            <img th:if="${mon.hinhAnh == null or mon.hinhAnh == ''}"
-                                 th:src="@{/images/profiles/dish.png}"
-                                 alt="Ảnh mặc định">
-                        </div>
+						    <img th:if="${mon.hinhAnh != null and mon.hinhAnh != ''}"
+					         th:src="@{/images/food-img/{h}(h=${mon.hinhAnh})}"
+					         th:alt="${mon.tenMon}">
+					         
+					    <img th:if="${mon.hinhAnh == null or mon.hinhAnh == ''}"
+					         th:src="@{/images/profiles/dish.png}"
+					         alt="Ảnh mặc định">
+						</div>
 
                         <div class="dish-body">
                             <div class="dish-name" th:text="${mon.tenMon}">Tên món</div>

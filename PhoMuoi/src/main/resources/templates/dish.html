@@ -194,14 +194,15 @@
                     <div class="dish-card">
 
                         <!-- Ảnh món ăn -->
-                        <div class="dish-img-wrapper">
-                            <img th:if="${mon.anh != null and mon.anh != ''}"
-                                 th:src="@{/images/mon-an/{anh}(anh=${mon.anh})}"
-                                 th:alt="${mon.tenMonAn}">
-                            <img th:if="${mon.anh == null or mon.anh == ''}"
-                                 th:src="@{/images/profiles/dish.png}"
-                                 alt="Ảnh mặc định">
-                        </div>
+                        <div class="dish-img">
+						    <img th:if="${mon.hinhAnh != null and mon.hinhAnh != ''}"
+					         th:src="@{/images/food-img/{h}(h=${mon.hinhAnh})}"
+					         th:alt="${mon.tenMon}">
+					         
+					    <img th:if="${mon.hinhAnh == null or mon.hinhAnh == ''}"
+					         th:src="@{/images/profiles/dish.png}"
+					         alt="Ảnh mặc định">
+						</div>
 
                         <div class="dish-body">
                             <div class="dish-name" th:text="${mon.tenMonAn}">Tên món</div>

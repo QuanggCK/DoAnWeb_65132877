@@ -242,8 +242,15 @@
                                 <tbody>
                                     <tr th:each="ct : ${donHang.dsChiTietDonHang}">
                                         <td>
-                                            <img th:src="${ct.monAn.hinhAnh != null and ct.monAn.hinhAnh != '' ? '/images/products/' + ct.monAn.hinhAnh : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'}" 
-                                                 class="product-img" alt="Hình ảnh món ăn">
+                                            <img th:if="${mon.hinhAnh != null and mon.hinhAnh != ''}"
+											     th:src="@{${mon.hinhAnh}}"
+											     th:alt="${mon.tenMon}">">
+											
+											<img th:if="${ct.monAn.hinhAnh == null or ct.monAn.hinhAnh == ''}"
+											     th:src="@{/images/profiles/dish.png}"
+											     alt="Ảnh mặc định"
+											     class="img-thumbnail" 
+											     style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
                                         </td>
                                         <td>
                                             <div class="product-name" th:text="${ct.monAn.tenMon}">Tên món ăn</div>
