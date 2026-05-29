@@ -1,169 +1,312 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Điều Chỉnh Quảng Cáo - PhoMuoi</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Điều Chỉnh Quảng Cáo - Admin</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    
     <style>
+        /* CSS Variables - Bảng màu Dark Mode */
+        :root {
+            --bg: #0d0d0d;
+            --surface: #161616;
+            --border: #2a2a2a;
+            --accent: #ff5c00;
+            --text: #f0ece4;
+            --muted: #6b6b6b;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #F4F6F9;
-            color: #374151;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
         }
-        .card-adjust {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            border: none;
+
+        /* Sidebar Style */
+        .sidebar {
+            width: 240px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
         }
-        .form-label {
-            font-weight: 600;
-            color: #4b5563;
+        .sidebar-logo { padding: 24px; border-bottom: 1px solid var(--border); text-align: center; }
+        .sidebar-logo .brand { font-family: 'Bebas Neue', cursive; font-size: 36px; color: var(--accent); letter-spacing: 2px; }
+        .sidebar-logo .sub { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .nav { padding: 20px 0; flex: 1; overflow-y: auto; }
+        .nav-section { padding: 10px 24px 5px; font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 600; letter-spacing: 1px; }
+        .nav-item { display: flex; align-items: center; padding: 12px 24px; color: var(--text); text-decoration: none; font-size: 15px; transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-item .icon { width: 24px; color: var(--muted); transition: 0.2s; }
+        .nav-item:hover { background: rgba(255, 92, 0, 0.05); color: var(--accent); }
+        .nav-item:hover .icon { color: var(--accent); }
+        .nav-item.active { background: rgba(255, 92, 0, 0.1); border-left-color: var(--accent); color: var(--accent); font-weight: 500; }
+        .nav-item.active .icon { color: var(--accent); }
+
+        /* Main Content Style */
+        .main-content {
+            margin-left: 240px;
+            padding: 40px;
+            width: calc(100% - 240px);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .page-title {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 32px;
+            letter-spacing: 1px;
+            color: var(--accent);
+        }
+        .page-sub {
+            color: var(--muted);
             font-size: 14px;
         }
-        .form-control:focus, .form-select:focus {
-            border-color: #121ba6;
-            box-shadow: 0 0 0 0.25rem rgba(18, 27, 166, 0.15);
+
+        /* Card & Form Style */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
         }
-        .btn-save {
-            background-color: #121ba6;
-            color: white;
-            transition: all 0.2s;
+        .form-group {
+            margin-bottom: 20px;
         }
-        .btn-save:hover {
-            background-color: #0b1170;
-            color: white;
-            transform: translateY(-1px);
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
         }
-        .preview-img {
-            max-height: 160px;
-            object-fit: cover;
+        .form-control {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px 16px;
             border-radius: 8px;
-            border: 1px dashed #cbd5e1;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
         }
+        .form-control:focus {
+            border-color: var(--accent);
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-secondary { background: var(--border); color: var(--text); }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--surface);
+            border-left: 4px solid var(--accent);
+            color: var(--text);
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); }
+        .toast i { font-size: 20px; }
+        .toast.success i { color: var(--success); }
+        .toast.error i { color: var(--danger); }
     </style>
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body>
 
-    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/sidebarAdmin :: sidebarAdmin(activePage='quang-cao')}"></div>
 
-    <div class="container my-5 flex-grow-1">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                
-                <div class="mb-3">
-                    <a href="javascript:history.back()" class="text-decoration-none text-secondary fw-semibold small">
-                        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
-                    </a>
-                </div>
-
-                <div class="card card-adjust p-4 p-md-5">
-                    <div class="text-center mb-4">
-                        <h3 class="fw-bold text-uppercase" style="color: #121ba6; letter-spacing: 0.5px;">
-                            <i class="bi bi-pencil-square text-warning me-2"></i>Chỉnh Sửa Quảng Cáo
-                        </h3>
-                        <p class="text-muted small">Cập nhật nội dung, tải ảnh lên thư mục announcements hoặc thay đổi trạng thái</p>
-                        <div style="width: 50px; height: 3px; background: #f97316; margin: 10px auto; border-radius: 2px;"></div>
-                    </div>
-
-                    <form th:action="@{/admin/quang-cao/edit/{id}(id=${idQuangCao})}" method="POST" enctype="multipart/form-data">
-                        
-                        <div class="mb-3">
-                            <label for="tieuDe" class="form-label">Tiêu đề chương trình <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control py-2" id="tieuDe" name="tieuDe" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="noiDung" class="form-label">Nội dung chi tiết <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="noiDung" name="noiDung" rows="4" required></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="anhQuangCao" class="form-label">Chọn hình ảnh quảng cáo mới</label>
-                            <input type="file" class="form-control py-2" id="anhQuangCao" name="anhQuangCao" accept="image/*">
-                            <div class="form-text text-muted small">Nếu không muốn thay đổi ảnh cũ, bạn hãy để trống ô này.</div>
-                        </div>
-
-                        <div class="mb-4 d-none" id="previewContainer">
-                            <label class="form-label d-block">Hình ảnh đang hiển thị hiện tại:</label>
-                            <img src="" id="imgPreview" class="preview-img" alt="Ảnh quảng cáo hiện tại">
-                        </div>
-
-                        <div class="mb-4 p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
-                            <div>
-                                <label class="form-label mb-0 d-block">Trạng thái kích hoạt</label>
-                                <span class="text-muted small">Bật để hiển thị chương trình cho khách hàng hoặc tắt để ẩn đi</span>
-                            </div>
-                            <div class="form-check form-switch fs-4">
-                                <input class="form-check-input" type="checkbox" id="trangThai" name="trangThai" value="true" style="cursor: pointer;">
-                            </div>
-                        </div>
-
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <a href="javascript:history.back()" class="btn btn-light w-100 py-2 fw-semibold text-secondary" style="border-radius: 8px;">
-                                    Hủy bỏ
-                                </a>
-                            </div>
-                            <div class="col-6">
-                                <button type="submit" class="btn btn-save w-100 py-2 fw-semibold shadow-sm" style="border-radius: 8px;">
-                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> Lưu thay đổi
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                </div>
+    <main class="main-content">
+        <header class="header">
+            <div>
+                <h1 class="page-title">Điều Chỉnh Quảng Cáo</h1>
+                <p class="page-sub">Cập nhật thông tin chiến dịch truyền thông</p>
             </div>
+            <a href="/admin/quang-cao" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+        </header>
+
+        <div class="card">
+            <form id="adjustForm">
+                <div class="form-group">
+                    <label class="form-label">Tiêu đề quảng cáo</label>
+                    <input type="text" id="tieuDe" class="form-control" required placeholder="Nhập tiêu đề...">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nội dung chi tiết</label>
+                    <textarea id="noiDung" class="form-control" rows="4" required placeholder="Nhập nội dung quảng cáo..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Hình ảnh (Tên file hoặc URL ảnh)</label>
+                    <input type="text" id="hinhAnh" class="form-control" placeholder="VD: banner-khuyen-mai.jpg" />
+                </div>
+                
+                <div class="form-group" id="previewContainer" style="display: none;">
+                    <label class="form-label">Ảnh hiện tại:</label>
+                    <img id="imgPreview" src="" alt="Preview" style="max-width: 200px; border-radius: 8px; border: 1px solid var(--border);">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Trạng thái hiển thị</label>
+                    <select id="trangThai" class="form-control">
+                        <option value="true">Hiển thị (Active)</option>
+                        <option value="false">Ẩn (Inactive)</option>
+                    </select>
+                </div>
+                
+                <div style="text-align: right; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
         </div>
+    </main>
+
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" id="toast-icon"></i>
+        <span id="toast-msg">Thông báo</span>
     </div>
 
-    <footer class="bg-dark text-white text-center py-3 mt-auto" style="font-size: 14px;">
-        <p class="mb-0">&copy; 2026 PhoMuoi Restaurant. Tất cả các quyền được bảo lưu.</p>
-    </footer>
+    <script>
+        const API = '/api/admin/quang-cao';
+        
+        // Hàm hiển thị thông báo Toast
+        function toast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            t.className = `toast show ${type}`;
+            const icon = document.getElementById('toast-icon');
+            icon.className = type === 'success' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation';
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
 
-    <script th:inline="javascript">
-        // Lấy ID quảng cáo an toàn từ Thymeleaf truyền xuống
-        const idQuangCao = /*[[${idQuangCao}]]*/ null;
+        // Lấy ID từ URL (VD: ?id=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const qcId = urlParams.get('id');
 
-        document.addEventListener("DOMContentLoaded", function () {
-            if (!idQuangCao) return;
+        if (!qcId) {
+            alert("Không tìm thấy ID quảng cáo!");
+            window.location.href = '/admin/quang-cao';
+        }
 
-            // Gọi API lấy dữ liệu cũ để hiển thị sẵn cho Admin sửa
-            fetch(`/api/admin/quang-cao/${idQuangCao}`)
-                .then(response => {
-                    if (!response.ok) throw new Error("Không tìm thấy quảng cáo!");
-                    return response.json();
+        // Tải dữ liệu quảng cáo cũ lên Form
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch(`${API}/${qcId}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Không tìm thấy dữ liệu quảng cáo!");
+                    return res.json();
                 })
                 .then(data => {
-                    document.getElementById('tieuDe').value = data.tieuDe;
-                    document.getElementById('noiDung').value = data.noiDung;
-                    document.getElementById('trangThai').checked = data.trangThai === true;
+                    document.getElementById('tieuDe').value = data.tieuDe || '';
+                    document.getElementById('noiDung').value = data.noiDung || '';
+                    document.getElementById('hinhAnh').value = data.hinhAnh || '';
+                    document.getElementById('trangThai').value = data.trangThai ? 'true' : 'false';
 
-                    // Đổ ảnh hiển thị cũ (Nếu ảnh cũ đang lưu ở thư mục announcements thì lấy ra, ngược lại lấy ảnh cũ ở quang-cao)
+                    // Hiển thị ảnh cũ nếu có
                     if (data.hinhAnh) {
                         const imgPreview = document.getElementById('imgPreview');
-                        
-                        // Check xem ảnh cũ có chuỗi thời gian (ảnh upload mới) hay ảnh mẫu để lấy đúng đường dẫn tương ứng
-                        if(data.hinhAnh.includes('_')) {
+                        if (data.hinhAnh.includes('_')) {
                             imgPreview.src = `/images/announcements/${data.hinhAnh}`;
                         } else {
                             imgPreview.src = `/images/quang-cao/${data.hinhAnh}`;
                         }
-                        
-                        document.getElementById('previewContainer').classList.remove('d-none');
+                        document.getElementById('previewContainer').style.display = 'block';
                     }
                 })
-                .catch(error => console.error("Lỗi tải thông tin quảng cáo:", error));
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    toast("Lỗi tải thông tin quảng cáo!", "error");
+                });
+        });
+
+        // Xử lý khi nhấn nút Lưu thay đổi
+        document.getElementById('adjustForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            // Lấy dữ liệu từ Form (Gửi dưới dạng JSON để khớp với @RequestBody trong Controller)
+            const bodyData = {
+                tieuDe: document.getElementById('tieuDe').value.trim(),
+                noiDung: document.getElementById('noiDung').value.trim(),
+                hinhAnh: document.getElementById('hinhAnh').value.trim() || null,
+                trangThai: document.getElementById('trangThai').value === 'true'
+            };
+
+            fetch(`${API}/${qcId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bodyData)
+            })
+            .then(async (res) => {
+                if (!res.ok) {
+                    const err = await res.text();
+                    throw new Error(err || "Cập nhật thất bại!");
+                }
+                return res.json();
+            })
+            .then(() => {
+                toast("Cập nhật quảng cáo thành công!");
+                // Chuyển hướng về trang danh sách sau 1.5 giây
+                setTimeout(() => {
+                    window.location.href = '/admin/quang-cao';
+                }, 1500);
+            })
+            .catch(error => {
+                console.error("Lỗi:", error);
+                toast(error.message, "error");
+            });
         });
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

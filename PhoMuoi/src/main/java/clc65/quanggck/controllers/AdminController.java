@@ -98,12 +98,39 @@ public class AdminController {
  
     // ----- QUẢN LÝ DANH MỤC -----
  
+ // ----- QUẢN LÝ DANH MỤC -----
+    
+    // 1. Lấy danh sách tất cả danh mục
+    @GetMapping("/api/admin/danh-muc")
+    @ResponseBody
+    public ResponseEntity<List<DanhMuc>> getAllDanhMuc() {
+        return ResponseEntity.ok(danhMucService.getAllDanhMuc());
+    }
+
+    // 2. Lấy chi tiết 1 danh mục theo ID
+    @GetMapping("/api/admin/danh-muc/{id}")
+    @ResponseBody
+    public ResponseEntity<DanhMuc> getDanhMucById(@PathVariable Integer id) {
+        return ResponseEntity.ok(danhMucService.getDanhMucById(id));
+    }
+
+    // 3. Thêm danh mục mới
     @PostMapping("/api/admin/danh-muc")
     @ResponseBody
     public ResponseEntity<DanhMuc> saveDanhMuc(@RequestBody DanhMuc danhMuc) {
         return ResponseEntity.ok(danhMucService.saveDanhMuc(danhMuc));
     }
+
+    // 4. Cập nhật danh mục đã có
+    @PutMapping("/api/admin/danh-muc/{id}")
+    @ResponseBody
+    public ResponseEntity<DanhMuc> updateDanhMuc(@PathVariable Integer id, @RequestBody DanhMuc danhMuc) {
+        // Gắn ID vào object để Spring Data JPA hiểu đây là lệnh Update chứ không phải Thêm mới
+        danhMuc.setId(id);
+        return ResponseEntity.ok(danhMucService.saveDanhMuc(danhMuc));
+    }
  
+    // 5. Xóa danh mục
     @DeleteMapping("/api/admin/danh-muc/{id}")
     @ResponseBody
     public ResponseEntity<String> deleteDanhMuc(@PathVariable Integer id) {

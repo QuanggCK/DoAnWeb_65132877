@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quản Lý Đơn Hàng – Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --border: #2a2a2a;
+    --accent: #ff5c00;
+    --accent2: #ffb800;
+    --text: #f0ece4;
+    --muted: #6b6b6b;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #eab308;
+    --info: #3b82f6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
+
+  /* ── SIDEBAR ── */
+  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:10;}
+  .sidebar .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);letter-spacing:1px;padding:25px 20px;border-bottom:1px solid var(--border);text-align:center;}
+  .nav-menu{display:flex;flex-direction:column;padding:15px 10px;gap:5px;flex:1;}
+  .nav-menu a{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none;padding:12px 15px;border-radius:6px;font-size:14px;font-weight:500;transition:0.2s;}
+  .nav-menu a:hover{background:rgba(255,92,0,0.08);color:var(--accent);}
+  .nav-menu a.active{background:var(--accent);color:#fff;font-weight:600;}
+  .nav-menu a i{width:18px;font-size:16px;text-align:center;}
+
+  /* ── MAIN CONTENT ── */
+  .main-content{flex:1;margin-left:240px;padding:30px;min-height:100vh;display:flex;flex-direction:column;}
+  .header-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;color:#fff;margin-bottom:25px;display:flex;align-items:center;gap:10px;}
+  .header-title i{color:var(--accent);}
+
+  /* ── STATS CARDS ── */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:20px;margin-bottom:25px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;align-items:center;justify-content:between;gap:15px;}
+  .stat-info .stat-num{font-size:24px;font-weight:700;color:#fff;margin-top:5px;}
+  .stat-info .stat-label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+  .stat-icon{width:45px;height:45px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+
+  /* ── FILTER & TOOLS ── */
+  .tool-bar{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:15px 20px;margin-bottom:25px;display:flex;flex-wrap:wrap;gap:15px;align-items:center;justify-content:space-between;}
+  .filter-group{display:flex;align-items:center;gap:10px;flex:1;min-width:300px;}
+  .search-wrapper{position:relative;flex:1;}
+  .search-wrapper i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;}
+  .search-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px 10px 35px;color:var(--text);font-family:inherit;font-size:14px;transition:0.2s;}
+  .search-input:focus{outline:none;border-color:var(--accent);}
+  .select-filter{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 15px;color:var(--text);font-family:inherit;font-size:14px;outline:none;cursor:pointer;min-width:15px;}
+  .select-filter:focus{border-color:var(--accent);}
+
+  /* ── DATA TABLE ── */
+  .table-container{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex:1;}
+  .data-table{width:100%;border-collapse:collapse;text-align:left;font-size:14px;}
+  .data-table th{background:rgba(255,255,255,0.02);padding:15px 20px;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);}
+  .data-table td{padding:15px 20px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  .data-table tr:last-child td{border-bottom:none;}
+  .data-table tr:hover td{background:rgba(255,255,255,0.01);}
+
+  /* Status Badges */
+  .badge {display:inline-block;padding:5px 10px;border-radius:4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
+  .badge-pending {background:rgba(234,179,8,0.1);color:var(--warning);}
+  .badge-delivering {background:rgba(59,130,246,0.1);color:var(--info);}
+  .badge-delivered {background:rgba(34,197,94,0.1);color:var(--success);}
+  .badge-cancelled {background:rgba(239,68,68,0.1);color:var(--danger);}
+
+  /* Actions Styling */
+  .status-select-cell {min-width: 160px;}
+  .inline-status-select {background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:6px 10px;color:var(--text);font-family:inherit;font-size:13px;outline:none;cursor:pointer;width:100%;transition:0.2s;}
+  .inline-status-select:focus {border-color:var(--accent);}
+
+  /* ── TOAST NOTIFICATION ── */
+  .toast-box{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+  .toast-item{background:var(--surface);border-left:4px solid var(--accent);color:var(--text);padding:15px 20px;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,0.5);display:flex;align-items:center;gap:12px;min-width:280px;animation:slideIn 0.3s ease forwards;}
+  .toast-item.success{border-left-color:var(--success);}
+  .toast-item.error{border-left-color:var(--danger);}
+  @keyframes slideIn{from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
+  /* Loading state */
+  .empty-state{text-align:center;padding:5px 0;color:var(--muted);font-style:italic;}
+</style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="logo">ANGEL MENU</div>
+    <nav class="nav-menu">
+      <a th:href="@{/admin}"><i class="fa-solid fa-chart-pie"></i> Tổng quan</a>
+      <a th:href="@{/admin/food}"><i class="fa-solid fa-utensils"></i> Món ăn</a>
+      <a th:href="@{/admin/danh-muc}"><i class="fa-solid fa-list"></i> Danh mục</a>
+      <a th:href="@{/admin/don-hang}" class="active"><i class="fa-solid fa-clipboard-list"></i> Đơn hàng</a>
+      <a th:href="@{/admin/doanh-thu}"><i class="fa-solid fa-wallet"></i> Doanh thu</a>
+      <a th:href="@{/admin/users}"><i class="fa-solid fa-users"></i> Khách hàng</a>
+      <a th:href="@{/admin/quang-cao}"><i class="fa-solid fa-rectangle-ad"></i> Quảng cáo</a>
+      <a th:href="@{/}" style="margin-top:auto; border-top:1px solid var(--border);"><i class="fa-solid fa-house"></i> Về trang chủ</a>
+    </nav>
+  </div>
+
+  <div class="main-content">
+    <h1 class="header-title"><i class="fa-solid fa-clipboard-list"></i> QUẢN LÝ ĐƠN HÀNG</h1>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Tổng số đơn</div>
+          <div class="stat-num" id="stat-total">0</div>
+        </div>
+        <div class="stat-icon" style="background:rgba(255,255,255,0.05); color:#fff;"><i class="fa-solid fa-boxes-stacked"></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Chờ xử lý</div>
+          <div class="stat-num" id="stat-pending" style="color:var(--warning)">0</div>
+        </div>
+        <div class="stat-icon" style="background:rgba(234,179,8,0.1); color:var(--warning);"><i class="fa-solid fa-clock"></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Đang giao</div>
+          <div class="stat-num" id="stat-delivering" style="color:var(--info)">0</div>
+        </div>
+        <div class="stat-icon" style="background:rgba(59,130,246,0.1); color:var(--info);"><i class="fa-solid fa-truck-fast"></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Đã hoàn thành</div>
+          <div class="stat-num" id="stat-delivered" style="color:var(--success)">0</div>
+        </div>
+        <div class="stat-icon" style="background:rgba(34,197,94,0.1); color:var(--success);"><i class="fa-solid fa-circle-check"></i></div>
+      </div>
+    </div>
+
+    <div class="tool-bar">
+      <div class="filter-group">
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="search-input" class="search-input" placeholder="Tìm theo Mã Đơn hoặc Tên Khách hàng..."/>
+        </div>
+        <select id="status-filter" class="select-filter">
+          <option value="ALL">Tất cả trạng thái</option>
+          <option value="PENDING">Chờ xử lý</option>
+          <option value="DELIVERING">Đang giao</option>
+          <option value="DELIVERED">Đã giao</option>
+          <option value="CANCELLED">Đã hủy</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">Mã Đơn</th>
+            <th>Khách Hàng</th>
+            <th>Ngày Đặt</th>
+            <th>Tổng Tiền</th>
+            <th style="width: 140px;">Trạng Thái</th>
+            <th style="width: 180px; text-align: center;">Thay đổi Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody id="order-table-body">
+          <tr>
+            <td colspan="6" class="empty-state">Đang tải dữ liệu đơn hàng...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="toast-box" id="toast-box"></div>
+
+  <script>
+    const API_BASE = '/api/admin/don-hang';
+    let allOrders = [];
+
+    // Tự động load dữ liệu khi mở trang
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchOrders();
+      
+      // Lắng nghe sự kiện tìm kiếm và lọc dữ liệu
+      document.getElementById('search-input').addEventListener('input', filterTable);
+      document.getElementById('status-filter').addEventListener('change', filterTable);
+    });
+
+    // Hàm gọi API lấy danh sách đơn hàng
+    async function fetchOrders() {
+      try {
+        const response = await fetch(API_BASE);
+        if (!response.ok) throw new Error('Không thể kết nối đến hệ thống!');
+        allOrders = await response.getJson ? await response.getJson() : await response.json();
+        
+        updateStats();
+        filterTable();
+      } catch (error) {
+        showToast('Lỗi tải danh sách đơn hàng: ' + error.message, 'error');
+        document.getElementById('order-table-body').innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--danger)">Lỗi tải dữ liệu đơn hàng. Vui lòng F5 lại trang!</td></tr>`;
+      }
+    }
+
+    // Hàm cập nhật các ô thống kê nhanh phía trên
+    function updateStats() {
+      document.getElementById('stat-total').textContent = allOrders.length;
+      document.getElementById('stat-pending').textContent = allOrders.filter(o => o.trangThai === 'PENDING').length;
+      document.getElementById('stat-delivering').textContent = allOrders.filter(o => o.trangThai === 'DELIVERING').length;
+      document.getElementById('stat-delivered').textContent = allOrders.filter(o => o.trangThai === 'DELIVERED').length;
+    }
+
+    // Hàm tìm kiếm và lọc cục bộ trên giao diện khách hàng
+    function filterTable() {
+      const searchVal = document.getElementById('search-input').value.trim().toLowerCase();
+      const statusFilter = document.getElementById('status-filter').value;
+      const tbody = document.getElementById('order-table-body');
+
+      let filtered = allOrders;
+
+      // 1. Lọc theo trạng thái select
+      if (statusFilter !== 'ALL') {
+        filtered = filtered.filter(o => o.trangThai === statusFilter);
+      }
+
+      // 2. Tìm kiếm theo mã ID hoặc tên khách hàng
+      if (searchVal) {
+        filtered = filtered.filter(o => {
+          const orderId = String(o.id).toLowerCase();
+          const customerName = o.user && (o.user.hoTen || o.user.tenKhach) ? (o.user.hoTen || o.user.tenKhach).toLowerCase() : 'khách vãng lai';
+          return orderId.includes(searchVal) || customerName.includes(searchVal);
+        });
+      }
+
+      // Render HTML ra bảng
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Không tìm thấy đơn hàng nào tương thích!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(order => {
+        const tenKhach = order.user ? (order.user.hoTen || order.user.tenKhach || 'Không rõ') : 'Khách vãng lai';
+        const ngayDat = order.ngayDat ? new Date(order.ngayDat).toLocaleString('vi-VN') : 'Vừa xong';
+        const tongTien = order.tongGia || order.tongTien || 0;
+
+        return `
+          <tr>
+            <td><b>#${order.id}</b></td>
+            <td>
+              <div style="font-weight:600; color:#fff;">${tenKhach}</div>
+              <div style="font-size:12px; color:var(--muted); margin-top:2px;">${order.user?.sdt || order.user?.username || ''}</div>
+            </td>
+            <td style="color:var(--muted); font-size:13px;">${ngayDat}</td>
+            <td style="color:var(--accent2); font-weight:600;">${tongTien.toLocaleString('vi-VN')} đ</td>
+            <td>${getStatusBadge(order.trangThai)}</td>
+            <td class="status-select-cell">
+              <select class="inline-status-select" onchange="updateOrderStatus(${order.id}, this.value)">
+                <option value="PENDING" ${order.trangThai === 'PENDING' ? 'selected' : ''}>Chờ xử lý</option>
+                <option value="DELIVERING" ${order.trangThai === 'DELIVERING' ? 'selected' : ''}>Đang giao</option>
+                <option value="DELIVERED" ${order.trangThai === 'DELIVERED' ? 'selected' : ''}>Đã giao</option>
+                <option value="CANCELLED" ${order.trangThai === 'CANCELLED' ? 'selected' : ''}>Đã hủy</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Hàm tạo chuỗi HTML cho badge trạng thái gọn đẹp
+    function getStatusBadge(status) {
+      switch (status) {
+        case 'PENDING': return `<span class="badge badge-pending">Chờ xử lý</span>`;
+        case 'DELIVERING': return `<span class="badge badge-delivering">Đang giao</span>`;
+        case 'DELIVERED': return `<span class="badge badge-delivered">Đã giao</span>`;
+        case 'CANCELLED': return `<span class="badge badge-cancelled">Đã hủy</span>`;
+        default: return `<span class="badge" style="background:#2a2a2a; color:var(--text)">${status}</span>`;
+      }
+    }
+
+    // Hàm gọi API cập nhật trạng thái đơn hàng khi quản trị viên thay đổi SelectBox
+    async function updateOrderStatus(orderId, newStatus) {
+      try {
+        const url = `${API_BASE}/${orderId}/trang-thai?trangThaiMoi=${newStatus}`;
+        const response = await fetch(url, { method: 'PUT' });
+        
+        if (!response.ok) throw new Error(await response.text() || 'Cập nhật thất bại');
+        
+        showToast(`Cập nhật trạng thái Đơn hàng #${orderId} thành công!`, 'success');
+        
+        // Refresh lại dữ liệu ngầm để cập nhật các ô thống kê
+        fetchOrders();
+      } catch (error) {
+        showToast('Không thể cập nhật trạng thái: ' + error.message, 'error');
+        fetchOrders(); // Reload lại để hoàn trả giá trị đúng của SelectBox bị lỗi trên UI
+      }
+    }
+
+    // Hàm thông báo Toast xịn sò tự biến mất sau 3 giây
+    function showToast(msg, type = 'success') {
+      const box = document.getElementById('toast-box');
+      const toast = document.createElement('div');
+      toast.className = `toast-item ${type}`;
+      
+      let icon = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>';
+      if(type === 'error') icon = '<i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i>';
+      
+      toast.innerHTML = `${icon} <span>${msg}</span>`;
+      box.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
