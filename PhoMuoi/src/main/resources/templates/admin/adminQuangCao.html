@@ -213,8 +213,15 @@
       <textarea id="f-noidung" rows="3" placeholder="Nhập nội dung..."></textarea>
     </div>
     <div class="form-group">
-      <label>Hình ảnh (URL hoặc Tên file)</label>
-      <input type="text" id="f-hinh" placeholder="VD: banner-1.jpg">
+      <label>Hình ảnh</label>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="f-hinh" placeholder="VD: banner-1.jpg" readonly style="flex: 1; background: rgba(255,255,255,0.05);">
+        <input type="file" id="f-file" style="display: none;" accept="image/*">
+        <button type="button" class="btn" style="white-space: nowrap; padding: 10px 14px;" onclick="document.getElementById('f-file').click()"><i class="fa-solid fa-folder-open"></i> Tìm trong máy</button>
+      </div>
+      <div id="f-preview-container" style="margin-top: 10px; display: none;">
+        <img id="f-preview" style="max-height: 100px; border-radius: 6px; border: 1px solid var(--border);" alt="Preview">
+      </div>
     </div>
     <div class="form-group">
       <label>Trạng thái</label>
@@ -314,7 +321,7 @@
         let imgSrc = '<div class="thumb" style="display:flex;align-items:center;justify-content:center;background:var(--border);color:var(--muted);font-size:10px">NO IMG</div>';
         if(image) {
             const path = image.includes('_') ? '/images/announcements/' : '/images/quang-cao/';
-            imgSrc = `<img src="${path}${image}" class="thumb" alt="IMG"/>`;
+            imgSrc = `<img src="/images/${image}" class="thumb" alt="IMG" onerror="this.onerror=null; this.src='${path}${image}'; this.onerror=function(){this.src='/images/announcements/${image}'}"/>`;
         }
         
         return `
@@ -363,11 +370,44 @@
     document.getElementById('f-noidung').value = '';
     document.getElementById('f-hinh').value = '';
     document.getElementById('f-trangthai').value = 'true';
+    document.getElementById('f-file').value = '';
+    document.getElementById('f-preview-container').style.display = 'none';
+    document.getElementById('f-preview').src = '';
     document.getElementById('modal').classList.add('open');
   }
   function closeModal(){
     document.getElementById('modal').classList.remove('open');
   }
+
+  // Handle local file selection and upload using HTML5 File structure
+  document.getElementById('f-file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', 'ad'); // ad maps directly to static/images/
+
+    fetch('/api/admin/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Không thể upload file!");
+      return res.json();
+    })
+    .then(data => {
+      document.getElementById('f-hinh').value = data.fileName;
+      const imgPreview = document.getElementById('f-preview');
+      imgPreview.src = data.filePath;
+      document.getElementById('f-preview-container').style.display = 'block';
+      toast("Tải ảnh từ máy thành công!");
+    })
+    .catch(err => {
+      console.error(err);
+      toast("Lỗi upload: " + err.message, "error");
+    });
+  });
   
   async function saveData(){
     const tieude = document.getElementById('f-tieude').value.trim();

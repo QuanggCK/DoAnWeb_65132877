@@ -5,7 +5,9 @@ import clc65.quanggck.services.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
  
+import java.io.File;
 import java.util.List;
  
 @Controller
@@ -90,6 +92,12 @@ public class AdminController {
     public String adminQuangCaoPage(jakarta.servlet.http.HttpSession session) {
         if (!isAdmin(session)) return "redirect:/login";
         return "admin/adminQuangCao";
+    }
+
+    @GetMapping("/admin/quang-cao/adjust")
+    public String adminQuangCaoAdjustPage(jakarta.servlet.http.HttpSession session) {
+        if (!isAdmin(session)) return "redirect:/login";
+        return "qc-adjust";
     }
  
     // =====================================================
@@ -263,5 +271,38 @@ public class AdminController {
     public ResponseEntity<String> deleteQuangCao(@PathVariable Integer id) {
         quangCaoService.deleteQuangCao(id);
         return ResponseEntity.ok("Xóa quảng cáo thành công!");
+    }
+
+    // ----- REST UPLOAD API -----
+    @PostMapping("/api/admin/upload")
+    @ResponseBody
+    public ResponseEntity<java.util.Map<String, String>> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("type") String type) {
+        java.util.Map<String, String> response = new java.util.HashMap<>();
+        try {
+            if (file == null || file.isEmpty()) {
+                response.put("error", "File is empty");
+                return ResponseEntity.badRequest().body(response);
+            }
+            String fileName = file.getOriginalFilename();
+            String folderPath = "src/main/resources/static/images/";
+            if ("food".equalsIgnoreCase(type)) {
+                folderPath += "food-img/";
+            }
+            File folder = new File(folderPath);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            File destFile = new File(folder, fileName);
+            file.transferTo(destFile);
+            
+            response.put("fileName", fileName);
+            response.put("filePath", "food".equalsIgnoreCase(type) ? "/images/food-img/" + fileName : "/images/" + fileName);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
     }
 }

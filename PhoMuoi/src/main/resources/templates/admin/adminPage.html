@@ -370,7 +370,7 @@
       try {
         const [orders, foods] = await Promise.all([
           fetch(API + '/don-hang').then(r => r.json()),
-          fetch('/api/mon-an').then(r => r.json()).catch(() => [])
+          fetch(API + '/mon-an').then(r => r.json()).catch(() => [])
         ]);
         
         const allOrders = Array.isArray(orders) ? orders : [];
