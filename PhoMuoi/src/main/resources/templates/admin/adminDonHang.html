@@ -292,110 +292,128 @@
 
   <div class="toast-box" id="toast-box"></div>
 
-  <script>
-    const API_BASE = '/api/admin/don-hang';
-    let allOrders = [];
+<script>
+  const API_BASE = '/api/admin/don-hang';
+  let allOrders = [];
 
-    document.addEventListener("DOMContentLoaded", () => {
-      fetchOrders();
-      document.getElementById('search-input').addEventListener('input', filterTable);
-      document.getElementById('status-filter').addEventListener('change', filterTable);
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchOrders();
+    document.getElementById('search-input').addEventListener('input', filterTable);
+    document.getElementById('status-filter').addEventListener('change', filterTable);
 
-      // Event delegation – đọc orderId từ data-order-id tại thời điểm user click
-      document.getElementById('order-table-body').addEventListener('change', function(e) {
-        if (!e.target.classList.contains('inline-status-select')) return;
-        const rawId = e.target.getAttribute('data-order-id');
-        const orderId = parseInt(rawId, 10);
-        console.log('[DEBUG] change event: rawId =', rawId, '| orderId =', orderId);
-        if (!rawId || rawId === 'null' || isNaN(orderId)) {
-          showToast('Lỗi: Mã đơn hàng không hợp lệ (id=' + rawId + ')', 'error');
-          return;
-        }
-        updateOrderStatus(orderId, e.target.value);
-      });
-    });
-
-    async function fetchOrders() {
-      try {
-        const res = await fetch(API_BASE);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        allOrders = await res.json();
-        console.log('[DEBUG] Tổng đơn hàng:', allOrders.length);
-        if (allOrders.length > 0) {
-          console.log('[DEBUG] Đơn đầu tiên:', JSON.stringify(allOrders[0]));
-        }
-        updateStats();
-        filterTable();
-      } catch (err) {
-        showToast('Lỗi tải đơn hàng: ' + err.message, 'error');
-        document.getElementById('order-table-body').innerHTML =
-          '<tr><td colspan="6" class="empty-state" style="color:var(--danger)">Lỗi tải dữ liệu. F5 để thử lại!</td></tr>';
-      }
-    }
-
-    function updateStats() {
-      document.getElementById('stat-total').textContent = allOrders.length;
-      document.getElementById('stat-pending').textContent =
-        allOrders.filter(o => o.trangThai === 'Chờ xác nhận').length;
-      document.getElementById('stat-delivering').textContent =
-        allOrders.filter(o => o.trangThai === 'Đang giao').length;
-      document.getElementById('stat-delivered').textContent =
-        allOrders.filter(o => o.trangThai === 'Đã giao').length;
-    }
-
-    function filterTable() {
-      const searchVal = document.getElementById('search-input').value.trim().toLowerCase();
-      const statusFilter = document.getElementById('status-filter').value;
-      const tbody = document.getElementById('order-table-body');
-
-      let filtered = allOrders;
-
-      if (statusFilter !== 'ALL') {
-        filtered = filtered.filter(o => o.trangThai === statusFilter);
-      }
-
-      if (searchVal) {
-        filtered = filtered.filter(o => {
-          const oId = String(o.orderId != null ? o.orderId : '').toLowerCase();
-          const name = o.user ? ((o.user.hoTen || o.user.tenKhach || '')).toLowerCase() : '';
-          return oId.includes(searchVal) || name.includes(searchVal);
-        });
-      }
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Không tìm thấy đơn hàng!</td></tr>';
+    document.getElementById('order-table-body').addEventListener('change', function(e) {
+      if (!e.target.classList.contains('inline-status-select')) return;
+      const rawId = e.target.getAttribute('data-order-id');
+      const orderId = parseInt(rawId, 10);
+      if (!rawId || rawId === '' || isNaN(orderId)) {
+        showToast('Lỗi: Không lấy được mã đơn hàng (id=' + rawId + ')', 'error');
         return;
       }
+      updateOrderStatus(orderId, e.target.value);
+    });
+  });
 
-      tbody.innerHTML = filtered.map(order => {
-        const oid     = order.orderId != null ? order.orderId : (order.id != null ? order.id : '');
-        const tenKhach = order.user ? (order.user.hoTen || order.user.tenKhach || 'Không rõ') : 'Khách vãng lai';
-        const sdt     = order.soDienThoaiNhan || (order.user && order.user.sdt) || '';
-        const ngayDat = order.ngayDat ? new Date(order.ngayDat).toLocaleString('vi-VN') : 'Vừa xong';
-        const tongTien = (order.tongGia || 0);
-        const tt      = order.trangThai || '';
+  async function fetchOrders() {
+    try {
+      const res = await fetch(API_BASE);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      allOrders = await res.json();
 
-        return `
-          <tr>
-            <td><b>#${oid || '?'}</b></td>
-            <td>
-              <div style="font-weight:600;color:#fff">${tenKhach}</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:2px">${sdt}</div>
-            </td>
-            <td style="color:var(--muted);font-size:13px">${ngayDat}</td>
-            <td style="color:var(--accent2);font-weight:600">${tongTien.toLocaleString('vi-VN')} đ</td>
-            <td>${getStatusBadge(tt)}</td>
-            <td class="status-select-cell">
-              <select class="inline-status-select" data-order-id="${oid}">
-                <option value="Chờ xác nhận" ${tt === 'Chờ xác nhận' ? 'selected' : ''}>Chờ xác nhận</option>
-                <option value="Đang giao"    ${tt === 'Đang giao'    ? 'selected' : ''}>Đang giao</option>
-                <option value="Đã giao"      ${tt === 'Đã giao'      ? 'selected' : ''}>Đã giao</option>
-                <option value="Đã hủy"       ${tt === 'Đã hủy'       ? 'selected' : ''}>Đã hủy</option>
-              </select>
-            </td>
-          </tr>`;
-      }).join('');
+      // ✅ LOG này sẽ cho thấy field ID thực tế từ API
+      if (allOrders.length > 0) {
+        console.log('[DEBUG] Keys của đơn đầu tiên:', Object.keys(allOrders[0]));
+        console.log('[DEBUG] Đơn đầu tiên:', JSON.stringify(allOrders[0]));
+      }
+
+      updateStats();
+      filterTable();
+    } catch (err) {
+      showToast('Lỗi tải đơn hàng: ' + err.message, 'error');
+      document.getElementById('order-table-body').innerHTML =
+        '<tr><td colspan="6" class="empty-state" style="color:var(--danger)">Lỗi tải dữ liệu!</td></tr>';
     }
+  }
+
+  // ✅ Hàm lấy ID linh hoạt — thử nhiều tên field phổ biến
+  function getOrderId(order) {
+    return order.orderId ?? order.id ?? order.donHangId ?? order.order_id ?? null;
+  }
+
+  function updateStats() {
+    document.getElementById('stat-total').textContent = allOrders.length;
+    document.getElementById('stat-pending').textContent =
+      allOrders.filter(o => o.trangThai === 'Chờ xác nhận').length;
+    document.getElementById('stat-delivering').textContent =
+      allOrders.filter(o => o.trangThai === 'Đang giao').length;
+    document.getElementById('stat-delivered').textContent =
+      allOrders.filter(o => o.trangThai === 'Đã giao').length;
+  }
+
+  // ✅ Map đúng value filter sang tên trạng thái thực tế trong DB
+  const STATUS_MAP = {
+    'ALL': null,
+    'PENDING': 'Chờ xác nhận',
+    'DELIVERING': 'Đang giao',
+    'DELIVERED': 'Đã giao',
+    'CANCELLED': 'Đã hủy',
+  };
+
+  function filterTable() {
+    const searchVal = document.getElementById('search-input').value.trim().toLowerCase();
+    const statusFilter = document.getElementById('status-filter').value;
+    const tbody = document.getElementById('order-table-body');
+
+    let filtered = allOrders;
+
+    // ✅ Dùng STATUS_MAP thay vì so sánh thẳng với 'PENDING'
+    const statusText = STATUS_MAP[statusFilter];
+    if (statusText) {
+      filtered = filtered.filter(o => o.trangThai === statusText);
+    }
+
+    if (searchVal) {
+      filtered = filtered.filter(o => {
+        const oId = String(getOrderId(o) ?? '').toLowerCase();
+        const name = o.user ? (o.user.hoTen || o.user.tenKhach || '').toLowerCase() : '';
+        return oId.includes(searchVal) || name.includes(searchVal);
+      });
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Không tìm thấy đơn hàng!</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(order => {
+      // ✅ Dùng hàm getOrderId() thay vì đoán tên field
+      const oid      = getOrderId(order);
+      const tenKhach = order.user ? (order.user.hoTen || order.user.tenKhach || 'Không rõ') : 'Khách vãng lai';
+      const sdt      = order.soDienThoaiNhan || (order.user && order.user.sdt) || '';
+      const ngayDat  = order.ngayDat ? new Date(order.ngayDat).toLocaleString('vi-VN') : 'Vừa xong';
+      const tongTien = order.tongGia || 0;
+      const tt       = order.trangThai || '';
+
+      return `
+        <tr>
+          <td><b>#${oid ?? '?'}</b></td>
+          <td>
+            <div style="font-weight:600;color:#fff">${tenKhach}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">${sdt}</div>
+          </td>
+          <td style="color:var(--muted);font-size:13px">${ngayDat}</td>
+          <td style="color:var(--accent2);font-weight:600">${tongTien.toLocaleString('vi-VN')} đ</td>
+          <td>${getStatusBadge(tt)}</td>
+          <td class="status-select-cell">
+            <select class="inline-status-select" data-order-id="${oid}">
+              <option value="Chờ xác nhận" ${tt === 'Chờ xác nhận' ? 'selected' : ''}>Chờ xác nhận</option>
+              <option value="Đang giao"    ${tt === 'Đang giao'    ? 'selected' : ''}>Đang giao</option>
+              <option value="Đã giao"      ${tt === 'Đã giao'      ? 'selected' : ''}>Đã giao</option>
+              <option value="Đã hủy"       ${tt === 'Đã hủy'       ? 'selected' : ''}>Đã hủy</option>
+            </select>
+          </td>
+        </tr>`;
+    }).join('');
+  }
 
     function getStatusBadge(status) {
       switch (status) {

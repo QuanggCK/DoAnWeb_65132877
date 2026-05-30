@@ -305,73 +305,85 @@
   </div>
 
   <script>
-    // Định nghĩa đường dẫn gốc REST API từ AdminController
     const API = '/api/admin';
+
+    // ✅ Tên trạng thái khớp DB thực tế
+    const TT_DAGIAO     = 'Đã giao';
+    const TT_CHOXACNHAN = 'Chờ xác nhận';
+    const TT_DANGGIAO   = 'Đang giao';
+    const TT_DAHUY      = 'Đã hủy';
+
+    // Hàm lấy ID linh hoạt
+    const getOid = o => o.orderId ?? o.id ?? o.donHangId ?? '?';
 
     // Hàm chuyển đổi tiền tệ VND
     function formatVND(amount) {
-      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
     }
 
     // Hàm gắn badge trạng thái
     function getStatusBadge(status) {
-      if (status === 'DELIVERED') return `<span class="badge badge-success">Thành công</span>`;
-      if (status === 'PENDING') return `<span class="badge badge-warning">Đang xử lý</span>`;
-      return `<span class="badge badge-danger">Đã hủy</span>`;
+      if (status === TT_DAGIAO)     return `<span class="badge badge-success">Đã giao</span>`;
+      if (status === TT_DANGGIAO)   return `<span class="badge badge-warning">Đang giao</span>`;
+      if (status === TT_CHOXACNHAN) return `<span class="badge badge-warning">Chờ xác nhận</span>`;
+      if (status === TT_DAHUY)      return `<span class="badge badge-danger">Đã hủy</span>`;
+      return `<span class="badge" style="background:#2a2a2a">${status || 'Không rõ'}</span>`;
     }
 
     async function loadRevenueStatistics() {
       try {
-        // Gọi API lấy toàn bộ danh sách đơn hàng công khai từ AdminController
         const response = await fetch(API + '/don-hang');
         if (!response.ok) throw new Error('Không thể tải dữ liệu đơn hàng');
         
-        const allOrders = await response.json();
+        const rawOrders = await response.json();
+        // ✅ Bỏ qua đơn "Giỏ hàng" chưa đặt
+        const allOrders = rawOrders.filter(o => o.trangThai !== 'Giỏ hàng');
 
-        // 1. Phân tách và tính toán các chỉ số tài chính
-        let totalRevenue = 0;   // Tổng tiền từ đơn hàng DELIVERED
-        let pendingRevenue = 0; // Tổng tiền từ đơn hàng PENDING
-        let countCancelled = 0; // Số lượng đơn CANCELLED
-        
+        let totalRevenue = 0;
+        let pendingRevenue = 0;
+        let countCancelled = 0;
         let countDelivered = 0;
         let countPending = 0;
-
-        // Mảng chứa các đơn hàng hoàn thành để đổ vào bảng chi tiết
         const deliveredOrders = [];
 
         allOrders.forEach(order => {
-          // Xử lý linh hoạt trường dữ liệu tổng tiền tài khoản (chấp nhận ca tongGia hoặc tongTien)
           const amount = order.tongGia || order.tongTien || 0;
 
-          if (order.trangThai === 'DELIVERED') {
+          if (order.trangThai === TT_DAGIAO) {
             totalRevenue += amount;
             countDelivered++;
             deliveredOrders.push(order);
-          } else if (order.trangThai === 'PENDING') {
+          } else if (order.trangThai === TT_CHOXACNHAN || order.trangThai === TT_DANGGIAO) {
             pendingRevenue += amount;
             countPending++;
-          } else if (order.trangThai === 'CANCELLED') {
+          } else if (order.trangThai === TT_DAHUY) {
             countCancelled++;
           }
         });
 
-        // Cập nhật số liệu hiển thị lên các thẻ thống kê chính
         document.getElementById('val-revenue').textContent = formatVND(totalRevenue);
         document.getElementById('val-pending').textContent = formatVND(pendingRevenue);
         document.getElementById('val-cancelled').textContent = countCancelled + ' Đơn';
         document.getElementById('val-total-orders').textContent = allOrders.length + ' Đơn';
 
-        // 2. Render đồ thị thanh ngang trạng thái đơn hàng
-        const stats = { 'DELIVERED': countDelivered, 'PENDING': countPending, 'CANCELLED': countCancelled };
-        const barColors = { 'DELIVERED': 'var(--success)', 'PENDING': 'var(--accent2)', 'CANCELLED': 'var(--danger)' };
-        const translateStatus = { 'DELIVERED': 'Thành công', 'PENDING': 'Đang xử lý', 'CANCELLED': 'Đã hủy' };
+        // ✅ Biểu đồ thanh - dùng nhãn tiếng Việt
+        const stats = {
+          [TT_DAGIAO]:     countDelivered,
+          [TT_CHOXACNHAN]: countPending,
+          [TT_DAHUY]:      countCancelled,
+        };
+        const barColors = {
+          [TT_DAGIAO]:     'var(--success)',
+          [TT_CHOXACNHAN]: 'var(--accent2)',
+          [TT_DAHUY]:      'var(--danger)',
+        };
 
         document.getElementById('box-status-bars').innerHTML = Object.entries(stats).map(([key, value]) => {
           const percent = allOrders.length ? ((value / allOrders.length) * 100).toFixed(1) : 0;
           return `
             <div class="bar-item">
               <div class="bar-info">
-                <span>${translateStatus[key]}</span>
+                <span>${key}</span>
                 <span style="font-weight:600; color:${barColors[key]}">${value} đơn (${percent}%)</span>
               </div>
               <div class="bar-track">
@@ -381,7 +393,7 @@
           `;
         }).join('');
 
-        // 3. Render bảng Top 5 đơn hàng có giá trị thanh toán lớn nhất
+        // ✅ Top 5 đơn hàng giá trị cao - dùng getOid()
         const topOrders = [...allOrders]
           .sort((a, b) => (b.tongGia || b.tongTien || 0) - (a.tongGia || a.tongTien || 0))
           .slice(0, 5);
@@ -390,7 +402,7 @@
           const clientName = o.user?.hoTen || o.user?.tenKhach || 'Khách vãng lai';
           return `
             <tr>
-              <td><b>#${o.id}</b></td>
+              <td><b>#${getOid(o)}</b></td>
               <td>${clientName}</td>
               <td style="color:var(--accent2); font-weight:600">${formatVND(o.tongGia || o.tongTien)}</td>
               <td>${getStatusBadge(o.trangThai)}</td>
@@ -398,16 +410,17 @@
           `;
         }).join('');
 
-        // 4. Render bảng dữ liệu các đơn hàng đã thanh toán (DELIVERED)
+        // ✅ Nhật ký đơn hàng đã giao
         if (deliveredOrders.length === 0) {
-          document.getElementById('tbl-delivered-orders').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--muted)">Chưa ghi nhận hóa đơn thành công nào.</td></tr>`;
+          document.getElementById('tbl-delivered-orders').innerHTML =
+            `<tr><td colspan="4" style="text-align:center; color:var(--muted)">Chưa ghi nhận hóa đơn thành công nào.</td></tr>`;
         } else {
           document.getElementById('tbl-delivered-orders').innerHTML = deliveredOrders.map(o => {
             const clientName = o.user?.hoTen || o.user?.tenKhach || 'Khách vãng lai';
             const orderDate = o.ngayDat ? new Date(o.ngayDat).toLocaleDateString('vi-VN') : 'N/A';
             return `
               <tr>
-                <td><b>#${o.id}</b></td>
+                <td><b>#${getOid(o)}</b></td>
                 <td>${clientName}</td>
                 <td style="color:var(--muted)">${orderDate}</td>
                 <td style="color:var(--success); font-weight:600">${formatVND(o.tongGia || o.tongTien)}</td>
@@ -421,7 +434,6 @@
       }
     }
 
-    // Tự động khởi chạy hàm thu thập dữ liệu ngay khi tải xong trang web
     document.addEventListener('DOMContentLoaded', loadRevenueStatistics);
   </script>
 </body>

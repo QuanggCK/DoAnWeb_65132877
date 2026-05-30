@@ -242,16 +242,17 @@
                                 <tbody>
                                     <tr th:each="ct : ${donHang.dsChiTietDonHang}">
                                         <td>
-                                            <img th:if="${mon.hinhAnh != null and mon.hinhAnh != ''}"
-											     th:src="@{${mon.hinhAnh}}"
-											     th:alt="${mon.tenMon}">">
-											
-											<img th:if="${ct.monAn.hinhAnh == null or ct.monAn.hinhAnh == ''}"
-											     th:src="@{/images/profiles/dish.png}"
-											     alt="Ảnh mặc định"
-											     class="img-thumbnail" 
-											     style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
-                                        </td>
+        								<!-- SỬA: đổi 'mon' thành 'ct.monAn' và bỏ dấu "> thừa -->
+									        <img th:if="${ct.monAn.hinhAnh != null and ct.monAn.hinhAnh != ''}"
+									             th:src="@{${ct.monAn.hinhAnh}}"
+									             th:alt="${ct.monAn.tenMon}"
+									             class="product-img">
+									
+									        <img th:if="${ct.monAn.hinhAnh == null or ct.monAn.hinhAnh == ''}"
+									             th:src="@{/images/profiles/dish.png}"
+									             alt="Ảnh mặc định"
+									             class="product-img">
+									    </td>
                                         <td>
                                             <div class="product-name" th:text="${ct.monAn.tenMon}">Tên món ăn</div>
                                             <small class="text-muted" th:text="'Mã món: #' + ${ct.monAn.id}">#1</small>

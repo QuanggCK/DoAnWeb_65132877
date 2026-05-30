@@ -376,15 +376,25 @@
         const allOrders = Array.isArray(orders) ? orders : [];
         document.getElementById('stat-foods').textContent = Array.isArray(foods) ? foods.length : 0;
 
+        // ✅ Tên trạng thái khớp với DB thực tế
+        const TT_DAGIAO     = 'Đã giao';
+        const TT_CHOXACNHAN = 'Chờ xác nhận';
+        const TT_DANGGIAO   = 'Đang giao';
+        const TT_DAHUY      = 'Đã hủy';
+
+        // Hàm lấy ID linh hoạt
+        const getOid = o => o.orderId ?? o.id ?? o.donHangId ?? '?';
+
         let totalRev = 0;
         let countPending = 0;
         let countDelivered = 0;
 
         allOrders.forEach(o => {
-          if (o.trangThai === 'DELIVERED') {
-            totalRev += (o.tongGia || o.tongTien || 0);
+          const amount = o.tongGia || o.tongTien || 0;
+          if (o.trangThai === TT_DAGIAO) {
+            totalRev += amount;
             countDelivered++;
-          } else if (o.trangThai === 'PENDING') {
+          } else if (o.trangThai === TT_CHOXACNHAN || o.trangThai === TT_DANGGIAO) {
             countPending++;
           }
         });
@@ -393,23 +403,37 @@
         document.getElementById('stat-pending').textContent = countPending;
         document.getElementById('stat-delivered').textContent = countDelivered;
 
-        const recent = [...allOrders].reverse().slice(0, 6);
+        // ✅ Bỏ qua đơn "Giỏ hàng" (chưa đặt), lấy 6 đơn gần nhất
+        const validOrders = allOrders.filter(o => o.trangThai !== 'Giỏ hàng');
+        const recent = [...validOrders].reverse().slice(0, 6);
+
+        const badgeClass = tt => {
+          if (tt === TT_DAGIAO)     return 'badge-success';
+          if (tt === TT_DAHUY)      return 'badge-danger';
+          return 'badge-warning';
+        };
+
         document.getElementById('tbl-recent-orders').querySelector('tbody').innerHTML = recent.map(o => `
           <tr>
-            <td><b>#${o.id}</b></td>
+            <td><b>#${getOid(o)}</b></td>
             <td>${o.user?.hoTen || o.user?.tenKhach || 'Khách vãng lai'}</td>
             <td>${o.ngayDat ? new Date(o.ngayDat).toLocaleDateString('vi-VN') : 'Vừa xong'}</td>
-            <td style="color:var(--accent2);font-weight:600">${fmt(o.tongGia || o.tongTien)}</td>
-            <td><span class="badge ${o.trangThai === 'DELIVERED' ? 'badge-success' : o.trangThai === 'CANCELLED' ? 'badge-danger' : 'badge-warning'}">${o.trangThai}</span></td>
+            <td style="color:var(--accent2);font-weight:600">${fmt(o.tongGia || o.tongTien || 0)}</td>
+            <td><span class="badge ${badgeClass(o.trangThai)}">${o.trangThai}</span></td>
           </tr>
         `).join('');
 
         const stats = {};
-        allOrders.forEach(o => { stats[o.trangThai] = (stats[o.trangThai] || 0) + 1; });
-        const colors = { 'DELIVERED': 'var(--success)', 'PENDING': 'var(--accent2)', 'CANCELLED': 'var(--danger)' };
-        
+        validOrders.forEach(o => { stats[o.trangThai] = (stats[o.trangThai] || 0) + 1; });
+        const colors = {
+          [TT_DAGIAO]:     'var(--success)',
+          [TT_DANGGIAO]:   'var(--info, #3b82f6)',
+          [TT_CHOXACNHAN]: 'var(--accent2)',
+          [TT_DAHUY]:      'var(--danger)',
+        };
+
         document.getElementById('box-status-bars').innerHTML = Object.entries(stats).map(([k, v]) => {
-          const pct = allOrders.length ? (v / allOrders.length * 100).toFixed(1) : 0;
+          const pct = validOrders.length ? (v / validOrders.length * 100).toFixed(1) : 0;
           return `
             <div class="bar-item">
               <div class="bar-info">
