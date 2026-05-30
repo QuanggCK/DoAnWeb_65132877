@@ -217,9 +217,12 @@ public class AdminController {
  
     @PutMapping("/api/admin/don-hang/{orderId}/trang-thai")
     @ResponseBody
-    public ResponseEntity<DonHang> updateTrangThaiDonHang(
+    public ResponseEntity<?> updateTrangThaiDonHang(
             @PathVariable("orderId") Integer orderId,
-            @RequestParam("trangThaiMoi") String trangThaiMoi) { 
+            @RequestParam("trangThaiMoi") String trangThaiMoi) {
+        if (orderId == null) {
+            return ResponseEntity.badRequest().body("Mã đơn hàng không hợp lệ!");
+        }
         return ResponseEntity.ok(donHangService.updateTrangThai(orderId, trangThaiMoi));
     }
     // ----- QUẢN LÝ KHÁCH HÀNG -----
