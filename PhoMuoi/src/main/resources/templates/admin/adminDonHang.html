@@ -310,7 +310,7 @@
       try {
         const response = await fetch(API_BASE);
         if (!response.ok) throw new Error('Không thể kết nối đến hệ thống!');
-        allOrders = await response.getJson ? await response.getJson() : await response.json();
+        allOrders = await response.json();
         
         updateStats();
         filterTable();
@@ -323,9 +323,9 @@
     // Hàm cập nhật các ô thống kê nhanh phía trên
     function updateStats() {
       document.getElementById('stat-total').textContent = allOrders.length;
-      document.getElementById('stat-pending').textContent = allOrders.filter(o => o.trangThai === 'PENDING').length;
-      document.getElementById('stat-delivering').textContent = allOrders.filter(o => o.trangThai === 'DELIVERING').length;
-      document.getElementById('stat-delivered').textContent = allOrders.filter(o => o.trangThai === 'DELIVERED').length;
+      document.getElementById('stat-pending').textContent = allOrders.filter(o => o.trangThai === 'Chờ xác nhận' || o.trangThai === 'PENDING').length;
+      document.getElementById('stat-delivering').textContent = allOrders.filter(o => o.trangThai === 'Đang giao' || o.trangThai === 'DELIVERING').length;
+      document.getElementById('stat-delivered').textContent = allOrders.filter(o => o.trangThai === 'Đã giao' || o.trangThai === 'DELIVERED').length;
     }
 
     // Hàm tìm kiếm và lọc cục bộ trên giao diện khách hàng
@@ -344,9 +344,9 @@
       // 2. Tìm kiếm theo mã ID hoặc tên khách hàng
       if (searchVal) {
         filtered = filtered.filter(o => {
-          const orderId = String(o.orderId).toLowerCase();
+          const oId = String(o.orderId || '').toLowerCase();
           const customerName = o.user && (o.user.hoTen || o.user.tenKhach) ? (o.user.hoTen || o.user.tenKhach).toLowerCase() : 'khách vãng lai';
-          return orderId.includes(searchVal) || customerName.includes(searchVal);
+          return oId.includes(searchVal) || customerName.includes(searchVal);
         });
       }
 
@@ -360,23 +360,25 @@
         const tenKhach = order.user ? (order.user.hoTen || order.user.tenKhach || 'Không rõ') : 'Khách vãng lai';
         const ngayDat = order.ngayDat ? new Date(order.ngayDat).toLocaleString('vi-VN') : 'Vừa xong';
         const tongTien = order.tongGia || order.tongTien || 0;
+        const sdt = order.soDienThoaiNhan || (order.user && order.user.sdt) || (order.user && order.user.username) || '';
+        const tt = order.trangThai || '';
 
         return `
           <tr>
             <td><b>#${order.orderId}</b></td>
             <td>
               <div style="font-weight:600; color:#fff;">${tenKhach}</div>
-              <div style="font-size:12px; color:var(--muted); margin-top:2px;">${order.user?.sdt || order.user?.username || ''}</div>
+              <div style="font-size:12px; color:var(--muted); margin-top:2px;">${sdt}</div>
             </td>
             <td style="color:var(--muted); font-size:13px;">${ngayDat}</td>
             <td style="color:var(--accent2); font-weight:600;">${tongTien.toLocaleString('vi-VN')} đ</td>
-            <td>${getStatusBadge(order.trangThai)}</td>
+            <td>${getStatusBadge(tt)}</td>
             <td class="status-select-cell">
-              <select class="inline-status-select" onchange="updateOrderStatus(${order.id}, this.value)">
-                <option value="PENDING" ${order.trangThai === 'PENDING' ? 'selected' : ''}>Chờ xử lý</option>
-                <option value="DELIVERING" ${order.trangThai === 'DELIVERING' ? 'selected' : ''}>Đang giao</option>
-                <option value="DELIVERED" ${order.trangThai === 'DELIVERED' ? 'selected' : ''}>Đã giao</option>
-                <option value="CANCELLED" ${order.trangThai === 'CANCELLED' ? 'selected' : ''}>Đã hủy</option>
+              <select class="inline-status-select" onchange="updateOrderStatus(${order.orderId}, this.value)">
+                <option value="Chờ xác nhận" ${tt === 'Chờ xác nhận' ? 'selected' : ''}>Chờ xác nhận</option>
+                <option value="Đang giao" ${tt === 'Đang giao' ? 'selected' : ''}>Đang giao</option>
+                <option value="Đã giao" ${tt === 'Đã giao' ? 'selected' : ''}>Đã giao</option>
+                <option value="Đã hủy" ${tt === 'Đã hủy' ? 'selected' : ''}>Đã hủy</option>
               </select>
             </td>
           </tr>
@@ -387,25 +389,29 @@
     // Hàm tạo chuỗi HTML cho badge trạng thái gọn đẹp
     function getStatusBadge(status) {
       switch (status) {
-        case 'PENDING': return `<span class="badge badge-pending">Chờ xử lý</span>`;
-        case 'DELIVERING': return `<span class="badge badge-delivering">Đang giao</span>`;
-        case 'DELIVERED': return `<span class="badge badge-delivered">Đã giao</span>`;
-        case 'CANCELLED': return `<span class="badge badge-cancelled">Đã hủy</span>`;
-        default: return `<span class="badge" style="background:#2a2a2a; color:var(--text)">${status}</span>`;
+        case 'PENDING':
+        case 'Chờ xác nhận': return `<span class="badge badge-pending">Chờ xác nhận</span>`;
+        case 'DELIVERING':
+        case 'Đang giao': return `<span class="badge badge-delivering">Đang giao</span>`;
+        case 'DELIVERED':
+        case 'Đã giao': return `<span class="badge badge-delivered">Đã giao</span>`;
+        case 'CANCELLED':
+        case 'Đã hủy': return `<span class="badge badge-cancelled">Đã hủy</span>`;
+        default: return `<span class="badge" style="background:#2a2a2a; color:var(--text)">${status || 'Không rõ'}</span>`;
       }
     }
 
     // Hàm gọi API cập nhật trạng thái đơn hàng khi quản trị viên thay đổi SelectBox
     async function updateOrderStatus(orderId, newStatus) {
+      if (!orderId || orderId === 'undefined') {
+        showToast('Lỗi: Mã đơn hàng không hợp lệ!', 'error');
+        return;
+      }
       try {
-        const url = `${API_BASE}/${orderId}/trang-thai?trangThaiMoi=${newStatus}`;
+        const url = `${API_BASE}/${orderId}/trang-thai?trangThaiMoi=${encodeURIComponent(newStatus)}`;
         const response = await fetch(url, { method: 'PUT' });
         
         if (!response.ok) throw new Error(await response.text() || 'Cập nhật thất bại');
-        if (!orderId || orderId === 'undefined') {
-            showToast('Lỗi: Mã đơn hàng không hợp lệ (undefined)! Hãy kiểm tra lại tên trường ID.', 'error');
-            return;
-          }
         showToast(`Cập nhật trạng thái Đơn hàng #${orderId} thành công!`, 'success');
         
         // Refresh lại dữ liệu ngầm để cập nhật các ô thống kê
