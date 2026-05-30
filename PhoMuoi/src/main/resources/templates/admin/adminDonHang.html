@@ -303,6 +303,19 @@
       // Lắng nghe sự kiện tìm kiếm và lọc dữ liệu
       document.getElementById('search-input').addEventListener('input', filterTable);
       document.getElementById('status-filter').addEventListener('change', filterTable);
+
+      // Dùng event delegation cho nút thay đổi trạng thái – tránh inline orderId bị undefined
+      document.getElementById('order-table-body').addEventListener('change', function(e) {
+        const sel = e.target.closest('.inline-status-select');
+        if (!sel) return;
+        const orderId = parseInt(sel.getAttribute('data-order-id'), 10);
+        const newStatus = sel.value;
+        if (!orderId || isNaN(orderId)) {
+          showToast('Lỗi: Mã đơn hàng không hợp lệ!', 'error');
+          return;
+        }
+        updateOrderStatus(orderId, newStatus);
+      });
     });
 
     // Hàm gọi API lấy danh sách đơn hàng
@@ -311,7 +324,10 @@
         const response = await fetch(API_BASE);
         if (!response.ok) throw new Error('Không thể kết nối đến hệ thống!');
         allOrders = await response.json();
-        
+        console.log('[DEBUG] Dữ liệu đơn hàng:', allOrders);
+        if (allOrders.length > 0) {
+          console.log('[DEBUG] orderId của đơn đầu tiên:', allOrders[0].orderId);
+        }
         updateStats();
         filterTable();
       } catch (error) {
@@ -362,10 +378,11 @@
         const tongTien = order.tongGia || order.tongTien || 0;
         const sdt = order.soDienThoaiNhan || (order.user && order.user.sdt) || (order.user && order.user.username) || '';
         const tt = order.trangThai || '';
+        const oid = order.orderId || order.id || null;
 
         return `
           <tr>
-            <td><b>#${order.orderId}</b></td>
+            <td><b>#${oid || '?'}</b></td>
             <td>
               <div style="font-weight:600; color:#fff;">${tenKhach}</div>
               <div style="font-size:12px; color:var(--muted); margin-top:2px;">${sdt}</div>
@@ -374,7 +391,7 @@
             <td style="color:var(--accent2); font-weight:600;">${tongTien.toLocaleString('vi-VN')} đ</td>
             <td>${getStatusBadge(tt)}</td>
             <td class="status-select-cell">
-              <select class="inline-status-select" onchange="updateOrderStatus(${order.orderId}, this.value)">
+              <select class="inline-status-select" data-order-id="${oid}">
                 <option value="Chờ xác nhận" ${tt === 'Chờ xác nhận' ? 'selected' : ''}>Chờ xác nhận</option>
                 <option value="Đang giao" ${tt === 'Đang giao' ? 'selected' : ''}>Đang giao</option>
                 <option value="Đã giao" ${tt === 'Đã giao' ? 'selected' : ''}>Đã giao</option>
@@ -401,24 +418,18 @@
       }
     }
 
-    // Hàm gọi API cập nhật trạng thái đơn hàng khi quản trị viên thay đổi SelectBox
+
+    // Hàm gọi API cập nhật trạng thái đơn hàng
     async function updateOrderStatus(orderId, newStatus) {
-      if (!orderId || orderId === 'undefined') {
-        showToast('Lỗi: Mã đơn hàng không hợp lệ!', 'error');
-        return;
-      }
       try {
         const url = `${API_BASE}/${orderId}/trang-thai?trangThaiMoi=${encodeURIComponent(newStatus)}`;
         const response = await fetch(url, { method: 'PUT' });
-        
         if (!response.ok) throw new Error(await response.text() || 'Cập nhật thất bại');
         showToast(`Cập nhật trạng thái Đơn hàng #${orderId} thành công!`, 'success');
-        
-        // Refresh lại dữ liệu ngầm để cập nhật các ô thống kê
         fetchOrders();
       } catch (error) {
         showToast('Không thể cập nhật trạng thái: ' + error.message, 'error');
-        fetchOrders(); // Reload lại để hoàn trả giá trị đúng của SelectBox bị lỗi trên UI
+        fetchOrders();
       }
     }
 
