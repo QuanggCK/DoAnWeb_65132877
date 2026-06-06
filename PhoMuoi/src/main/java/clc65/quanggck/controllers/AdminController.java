@@ -118,7 +118,7 @@ public class AdminController {
     // 2. Lấy chi tiết 1 danh mục theo ID
     @GetMapping("/api/admin/danh-muc/{id}")
     @ResponseBody
-    public ResponseEntity<DanhMuc> getDanhMucById(@PathVariable Integer id) {
+    public ResponseEntity<DanhMuc> getDanhMucById(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(danhMucService.getDanhMucById(id));
     }
 
@@ -132,7 +132,7 @@ public class AdminController {
     // 4. Cập nhật danh mục đã có
     @PutMapping("/api/admin/danh-muc/{id}")
     @ResponseBody
-    public ResponseEntity<DanhMuc> updateDanhMuc(@PathVariable Integer id, @RequestBody DanhMuc danhMuc) {
+    public ResponseEntity<DanhMuc> updateDanhMuc(@PathVariable("id") Integer id, @RequestBody DanhMuc danhMuc) {
         // Gắn ID vào object để Spring Data JPA hiểu đây là lệnh Update chứ không phải Thêm mới
         danhMuc.setId(id);
         return ResponseEntity.ok(danhMucService.saveDanhMuc(danhMuc));
@@ -141,7 +141,7 @@ public class AdminController {
     // 5. Xóa danh mục
     @DeleteMapping("/api/admin/danh-muc/{id}")
     @ResponseBody
-    public ResponseEntity<String> deleteDanhMuc(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteDanhMuc(@PathVariable("id") Integer id) {
         danhMucService.deleteDanhMuc(id);
         return ResponseEntity.ok("Xóa danh mục thành công!");
     }
@@ -270,7 +270,7 @@ public class AdminController {
  
     @DeleteMapping("/api/admin/quang-cao/{id}")
     @ResponseBody
-    public ResponseEntity<String> deleteQuangCao(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteQuangCao(@PathVariable("id") Integer id) {
         quangCaoService.deleteQuangCao(id);
         return ResponseEntity.ok("Xóa quảng cáo thành công!");
     }
