@@ -14,6 +14,10 @@ public class DanhMuc {
     @Column(name = "ten_danh_muc", nullable = false, length = 100)
     private String tenDanhMuc;
 
+    @Column(name = "mo_ta", length = 500)
+    private String moTa;
+
+
     // Một danh mục có NHIỀU món ăn (OneToMany)
     // JsonIgnoreProperties giúp tránh bị vòng lặp vô hạn khi xuất dữ liệu chuỗi JSON sang ReactJS
     @OneToMany(mappedBy = "danhMuc", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -26,6 +30,9 @@ public class DanhMuc {
 
     public String getTenDanhMuc() { return tenDanhMuc; }
     public void setTenDanhMuc(String tenDanhMuc) { this.tenDanhMuc = tenDanhMuc; }
+
+    public String getMoTa() { return moTa; }
+    public void setMoTa(String moTa) { this.moTa = moTa; }
 
     public List<MonAn> getDsMonAn() { return dsMonAn; }
     public void setDsMonAn(List<MonAn> dsMonAn) { this.dsMonAn = dsMonAn; }
