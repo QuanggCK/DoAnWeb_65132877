@@ -3,8 +3,6 @@ Link Demo: []
 ## 1. Mô tả ứng dụng
 Ứng dụng **PhoMuoi (Phở Mười)** là nền tảng website đặt đồ ăn trực tuyến (Food Order) được thiết kế dành riêng cho các nhà hàng, quán ăn. Hệ thống cung cấp một quy trình mua hàng mượt mà cho thực khách: từ việc khám phá thực đơn, thêm món vào giỏ hàng cho đến bước thanh toán và theo dõi lịch sử giao dịch. Đồng thời, dự án tích hợp một trang Quản trị (Admin Dashboard) toàn diện, giúp chủ quán dễ dàng kiểm soát menu, xử lý đơn hàng và quản lý tệp khách hàng, từ đó tối ưu hóa quy trình kinh doanh.
 
-![Trang Chủ Ứng Dụng](chèn_link_ảnh_trang_chủ_vào_đây)
-
 ---
 
 ## 2. Công nghệ sử dụng
@@ -121,65 +119,48 @@ src/
 │   ├── java/
 │   │   └── clc65/
 │   │       └── quanggck/
-│   │           ├── TaskManagerApplication.java  # File khởi chạy chính của ứng dụng Spring Boot
+│   │           ├── PhoMuoiApplication.java      # File khởi chạy chính của ứng dụng Spring Boot
 │   │           │
-│   │           ├── config/                      # Cấu hình hệ thống & Bảo mật
-│   │           │   └── SecurityConfig.java      # Cấu hình Spring Security (Phân quyền ADMIN/USER, Login/Logout)
+│   │           ├── config/                      # Cấu hình hệ thống và bảo mật
+│   │           │   ├── WebConfig.java           # Cấu hình hiển thị tài nguyên tĩnh và ảnh upload
+│   │           │   └── SecurityConfig.java      # Cấu hình Spring Security, đăng nhập và phân quyền
 │   │           │
-│   │           ├── controllers/                         # Tầng tiếp nhận Request từ trình duyệt và điều hướng View
-│   │           │   ├── AuthController.java              # Xử lý Đăng nhập, Đăng ký tài khoản
-│   │           │   ├── ProjectController.java           # Quản lý định tuyến Dự án (Xem, thêm, sửa, xóa dự án)
-│   │           │   └── TaskController.java              # Quản lý định tuyến Công việc & Bình luận (Xem, thêm, sửa, xóa, comment)
-│   │           │   └── GlobalControllerAdvice.java      # Nạp dữ liệu tự động cho thông báo (Top 5 thông báo gần nhất)
+│   │           ├── controllers/                 # Tiếp nhận request từ người dùng và điều hướng giao diện
+│   │           │   ├── AdminController.java     # Xử lý đăng nhập, đăng ký và các chức năng quản trị
+│   │           │   ├── HomeController.java      # Xử lý trang chủ, danh sách món ăn, quảng cáo và đơn hàng
+│   │           │   └── RController.java         # Cung cấp dữ liệu động (AJAX/API) cho giao diện
 │   │           │
-│   │           ├── models/                              # Tầng chứa các Entity định nghĩa cấu trúc bảng Database
-│   │           │   ├── User.java                        # Thông tin tài khoản, vai trò (Role)
-│   │           │   ├── Project.java                     # Thông tin dự án
-│   │           │   ├── Task.java                        # Thông tin chi tiết công việc, mức độ ưu tiên, hạn chót
-│   │           │   ├── TaskStatus.java                  # Định nghĩa trạng thái công việc (Mới, Đang làm, Hoàn thành)
-│   │           │   └── ProjectMember.java               # Thông tin các thành viên trong 1 dự án
-│   │           │   └── Notifiaction.java                # Thông báo về các thay đổi cập nhật (Thêm, sửa dự án).
-│   │           │   └── Comment.java                     # Thông tin nội dung thảo luận, thời gian tạo bình luận
+│   │           ├── models/                      # Các Entity ánh xạ với bảng trong cơ sở dữ liệu
+│   │           │   ├── User.java                # Thông tin tài khoản người dùng và quyền hạn
+│   │           │   ├── QuangCao.java            # Thông tin các banner/quảng cáo hiển thị trên website
+│   │           │   ├── MonAn.java               # Thông tin món ăn, giá bán, mô tả và hình ảnh
+│   │           │   ├── DonHang.java             # Thông tin đơn hàng của khách hàng
+│   │           │   ├── DanhMuc.java             # Danh mục phân loại món ăn
+│   │           │   └── CtDonHang.java           # Chi tiết các món ăn trong từng đơn hàng
 │   │           │
-│   │           ├── repos/                       # Tầng tương tác trực tiếp, truy vấn dữ liệu từ MySQL (JPA)
-│   │           │   ├── UserRepository.java      # Tìm kiếm user, kiểm tra trùng lặp email/username
-│   │           │   ├── ProjectRepository.java   # Truy vấn danh sách dự án
-│   │           │   ├── TaskRepository.java      # Tìm kiếm, lọc danh sách công việc
-│   │           │   ├── TaskStatusRepository.java# Truy vấn danh mục trạng thái
-│   │           │   ├── CommentRepository.java   # Lấy danh sách bình luận theo Task ID
-│   │           │   └── NotificationRepository.java# Truy vấn danh mục thông báo
+│   │           ├── repos/                       # Tầng truy cập dữ liệu sử dụng Spring Data JPA
+│   │           │   ├── UserRepository.java      # Truy vấn và quản lý thông tin người dùng
+│   │           │   ├── CtDonHangRepository.java # Truy vấn chi tiết đơn hàng
+│   │           │   ├── DonHangRepository.java   # Truy vấn và quản lý đơn hàng
+│   │           │   ├── MonAnRepository.java     # Truy vấn danh sách món ăn
+│   │           │   ├── QuangCaoRepository.java  # Truy vấn dữ liệu quảng cáo/banner
+│   │           │   └── DanhMucRepository.java   # Truy vấn danh mục món ăn
 │   │           │
-│   │           └── services/                      # Tầng xử lý logic nghiệp vụ xử lý dữ liệu trung gian
-│   │               ├── UserService.java           # Logic xử lý thông tin người dùng, lấy user đăng nhập hiện tại
-│   │               ├── ProjectService.java        # Logic tính toán, xử lý thông tin dự án
-│   │               ├── TaskService.java           # Logic phân công công việc, kiểm tra hạn chót
-│   │               ├── TaskStatusService.java     # Cung cấp danh mục trạng thái tiến độ
-│   │               ├── NotificationService.java   # Cung cấp danh sách top 5 thông báo thay đổi gần nhấtnhất
-│   │               └── CommentService.java        # Logic kiểm tra, lưu trữ các bình luận hợp lệ
+│   │           └── services/                    # Tầng xử lý nghiệp vụ của hệ thống
+│   │               ├── UserService.java         # Xử lý nghiệp vụ người dùng và xác thực tài khoản
+│   │               ├── DanhMucService.java      # Xử lý nghiệp vụ danh mục món ăn
+│   │               ├── DonHangService.java      # Xử lý tạo, cập nhật và quản lý đơn hàng
+│   │               ├── MonAnService.java        # Xử lý nghiệp vụ liên quan đến món ăn
+│   │               └── QuangCaoService.java     # Quản lý nội dung quảng cáo/banner
 │   │
 │   └── resources/
-│       ├── application.properties               # File cấu hình cấu hình Port, chuỗi kết nối MySQL DB, mã hóa
+│       ├── application.properties               # Cấu hình kết nối MySQL, port, upload file,...
 │       │
-│       ├── static/                              # Chứa tài nguyên tĩnh của hệ thống (Trình duyệt tải trực tiếp)
-│       │     
-│       └── templates/                           # Thư mục chứa toàn bộ giao diện HTML của hệ thống (Thymeleaf Engine)
-│           ├── login.html                       # Giao diện form Đăng nhập tài khoản
-│           │
-│           ├── fragments/                       # Các thành phần giao diện dùng chung được tái sử dụng
-│           │   ├── header.html                  # Thanh điều hướng phía trên cùng (Navbar, Thông tin User, Đăng xuất)
-│           │   └── sidebar.html                 # Thanh trình đơn bên trái (Menu chuyển tab Dự án, Công việc, Tài khoản)
-│           │
-│           ├── project/                         # Thư mục chứa bộ giao diện quản trị Dự án
-│           │   ├── list.html                    # Trang hiển thị danh sách toàn bộ dự án hiện có
-│           │   ├── add.html                     # Trang chứa form tạo dự án mới (Chỉ Admin nhìn thấy)
-│           │   └── edit.html                    # Trang chứa form cập nhật thông tin dự án
-│           │
-│           └── task/                            # Thư mục chứa bộ giao diện quản trị Công việc
-│               ├── list.html                    # Trang hiển thị danh sách công việc (Có hiển thị huy hiệu ưu tiên, trạng thái)
-│               ├── add.html                     # Trang chứa form tạo và phân công công việc mới
-│               ├── edit.html                    # Trang chứa form cập nhật tiến độ, sửa đổi công việc
-│               └── detail.html                  # Trang chi tiết công việc (Hiển thị đầy đủ mô tả, bảng thông tin và khung chat thảo luận)
-
+│       ├── static/                              # Chứa CSS, JavaScript, hình ảnh và tài nguyên tĩnh
+│       │
+│       └── templates/                           # Giao diện HTML sử dụng Thymeleaf
+│           ├── fragments/                       # Các thành phần dùng chung (header, footer, navbar,...)
+│           └── admin/                           # Giao diện dành cho quản trị viên
 ```
 
 
