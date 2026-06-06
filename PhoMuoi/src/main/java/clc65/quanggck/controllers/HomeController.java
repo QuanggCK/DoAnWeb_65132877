@@ -179,8 +179,9 @@ public class HomeController {
                 // Xử lý lưu ảnh nếu người dùng có upload ảnh mới
                 if (anhProfile != null && !anhProfile.isEmpty()) {
                     
-                    // SỬA 1: Sử dụng thư mục tuyệt đối bên ngoài project giống hệt cấu hình WebConfig
-                    String folderPath = System.getProperty("user.home") + "/phomuoi-uploads/profiles/";
+                    // Lưu ảnh vào đúng thư mục mà WebConfig đang serve: src/main/resources/static/images/profiles/
+                    String projectRoot = System.getProperty("user.dir");
+                    String folderPath = projectRoot + "/src/main/resources/static/images/profiles/";
                     
                     File folder = new File(folderPath);
                     if (!folder.exists()) {
@@ -190,12 +191,13 @@ public class HomeController {
                     String fileName = System.currentTimeMillis() + "_" + anhProfile.getOriginalFilename();
                     File destFile = new File(folder, fileName);
                     
-                    // SỬA 2: Bắt buộc dùng getAbsoluteFile() để không bị ném vào thư mục Temp rác của Tomcat
+                    // Dùng getAbsoluteFile() để tránh bị ném vào thư mục Temp của Tomcat
                     anhProfile.transferTo(destFile.getAbsoluteFile());
                     
                     // Lưu tên file vào database
                     userDb.setAnh(fileName);
                 }
+                // Nếu không upload ảnh mới → giữ nguyên ảnh cũ (không làm gì cả)
 
                 userRepository.save(userDb);
                 
@@ -327,8 +329,10 @@ public class HomeController {
     }
     @PostMapping("/dat-hang")
     public String createDonHang(
+            @RequestParam(value = "tenNguoiNhan", required = false) String tenNguoiNhan,
             @RequestParam(value = "soDienThoaiNhan", required = false) String soDienThoaiNhan,
-            @RequestParam(value = "diaChiGiaoHang", required = false) String diaChiGiaoHang, // THÊM DÒNG NÀY
+            @RequestParam(value = "diaChiNhan", required = false) String diaChiNhan,
+            @RequestParam(value = "phuongThucThanhToan", required = false) String phuongThucThanhToan,
             @RequestParam(value = "ghiChu", required = false) String ghiChu,
             HttpSession session, RedirectAttributes redirectAttributes) {
         
@@ -347,33 +351,21 @@ public class HomeController {
         }
         
         try {
-            // 3. Cập nhật thông tin nhận hàng & ghi chú từ form
-            if (soDienThoaiNhan != null) {
-                gioHangHienTai.setSoDienThoaiNhan(soDienThoaiNhan);
-            }
+            // 3. Cập nhật thông tin nhận hàng & ghi chú từ form Checkout
+            if (tenNguoiNhan != null) gioHangHienTai.setTenNguoiNhan(tenNguoiNhan);
+            if (soDienThoaiNhan != null) gioHangHienTai.setSoDienThoaiNhan(soDienThoaiNhan);
+            if (diaChiNhan != null) gioHangHienTai.setDiaChiNhan(diaChiNhan);
+            if (phuongThucThanhToan != null) gioHangHienTai.setPhuongThucThanhToan(phuongThucThanhToan);
+            if (ghiChu != null) gioHangHienTai.setGhiChu(ghiChu);
             
-            if (diaChiGiaoHang != null) {
-                // Gán địa chỉ vào thực thể User được liên kết với đơn hàng này
-                if (gioHangHienTai.getUser() != null) {
-                    gioHangHienTai.getUser().setDiaChi(diaChiGiaoHang);
-                }
-                // Cập nhật lại session userLogin 
-                userLogin.setDiaChi(diaChiGiaoHang);
-                session.setAttribute("userLogin", userLogin);
-            }
-            
-            if (ghiChu != null) {
-                gioHangHienTai.setGhiChu(ghiChu);
-            }
-            
-            // 4. CHUYỂN TRẠNG THÁI TỪ "Giỏ hàng" -> "Chờ xác nhận"
+            // 4. CHUYỂN TRẠNG THÁI TỪ "Giỏ hàng" -> "Chờ xác nhận" và lưu
             donHangService.createDonHang(gioHangHienTai);
             
             // 5. Cập nhật lại số lượng badge hiển thị trên Header về 0
             session.removeAttribute("gioHangSession"); 
             session.setAttribute("cartSize", 0);
             
-            // Gửi thông báo thành công (header.html sẽ tự động bắt được và hiển thị Toast)
+            // Gửi thông báo thành công
             redirectAttributes.addFlashAttribute("messageSuccess", "Chúc mừng! Bạn đã đặt hàng thành công.");
            
             return "redirect:/"; 
@@ -395,7 +387,6 @@ public class HomeController {
         
         model.addAttribute("dsDanhMuc", danhMucService.getAllDanhMuc()); 
         
-        // THÊM DÒNG NÀY ĐỂ KÍCH HOẠT HIỆU ỨNG SÁNG ĐÈN Ở SIDE-BAR:
         model.addAttribute("activePage", "lich-su");
 
         List<DonHang> lichSu = donHangService.getLichSuDonHang(userLogin.getUserId());

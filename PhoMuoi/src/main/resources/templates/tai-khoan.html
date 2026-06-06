@@ -183,13 +183,18 @@
 
             <div class="profile-body">
                 <div class="avatar-section">
-                    <div class="avatar-circle" th:if="${user.anh != null and user.anh != ''}">
-                        <img th:src="@{/images/profiles/{anh}(anh=${user.anh})}" 
-                             alt="Avatar"
-                             style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
-                    </div>
-                    
-                </div>
+				    <div class="avatar-circle" th:if="${user.anh != null and user.anh != ''}">
+				        <img th:src="@{'/images/profiles/' + ${user.anh}}" 
+				             alt="Avatar"
+				             style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+				    </div>
+				    
+				    <div class="avatar-circle" th:if="${user.anh == null or user.anh == ''}">
+				        <img th:src="@{/images/profiles/default-avatar.png}" 
+				             alt="Avatar mặc định"
+				             style="width:100%; height:100%; border-radius:50%; object-fit:cover; background-color: #fff;">
+				    </div>
+				</div>
 
                 <div class="info-list">
                     <div class="info-item">

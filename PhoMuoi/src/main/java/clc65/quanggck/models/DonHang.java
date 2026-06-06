@@ -32,6 +32,17 @@ public class DonHang {
     @Column(name = "ghi_chu", length = 255)
     private String ghiChu;
 
+    // ----- BỔ SUNG 3 TRƯỜNG MỚI THEO CSDL -----
+    @Column(name = "ten_nguoi_nhan", length = 100)
+    private String tenNguoiNhan;
+
+    @Column(name = "dia_chi_nhan", length = 255)
+    private String diaChiNhan;
+
+    @Column(name = "phuong_thuc_thanh_toan", length = 50)
+    private String phuongThucThanhToan;
+    // ------------------------------------------
+
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL)
     private List<CtDonHang> dsChiTietDonHang;
 
@@ -39,7 +50,9 @@ public class DonHang {
     public DonHang() {
     }
 
-    public DonHang(Integer orderId, User user, LocalDateTime ngayDat, Long tongGia, String trangThai, String soDienThoaiNhan, String ghiChu, List<CtDonHang> dsChiTietDonHang) {
+    public DonHang(Integer orderId, User user, LocalDateTime ngayDat, Long tongGia, String trangThai, 
+                   String soDienThoaiNhan, String ghiChu, String tenNguoiNhan, String diaChiNhan, 
+                   String phuongThucThanhToan, List<CtDonHang> dsChiTietDonHang) {
         this.orderId = orderId;
         this.user = user;
         this.ngayDat = ngayDat;
@@ -47,6 +60,9 @@ public class DonHang {
         this.trangThai = trangThai;
         this.soDienThoaiNhan = soDienThoaiNhan;
         this.ghiChu = ghiChu;
+        this.tenNguoiNhan = tenNguoiNhan;
+        this.diaChiNhan = diaChiNhan;
+        this.phuongThucThanhToan = phuongThucThanhToan;
         this.dsChiTietDonHang = dsChiTietDonHang;
     }
 
@@ -71,6 +87,17 @@ public class DonHang {
 
     public String getGhiChu() { return ghiChu; }
     public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
+
+    // --- GETTERS/SETTERS CHO 3 TRƯỜNG MỚI ---
+    public String getTenNguoiNhan() { return tenNguoiNhan; }
+    public void setTenNguoiNhan(String tenNguoiNhan) { this.tenNguoiNhan = tenNguoiNhan; }
+
+    public String getDiaChiNhan() { return diaChiNhan; }
+    public void setDiaChiNhan(String diaChiNhan) { this.diaChiNhan = diaChiNhan; }
+
+    public String getPhuongThucThanhToan() { return phuongThucThanhToan; }
+    public void setPhuongThucThanhToan(String phuongThucThanhToan) { this.phuongThucThanhToan = phuongThucThanhToan; }
+    // ----------------------------------------
 
     public List<CtDonHang> getDsChiTietDonHang() { return dsChiTietDonHang; }
     public void setDsChiTietDonHang(List<CtDonHang> dsChiTietDonHang) { this.dsChiTietDonHang = dsChiTietDonHang; }

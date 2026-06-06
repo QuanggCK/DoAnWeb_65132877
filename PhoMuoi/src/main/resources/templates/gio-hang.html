@@ -242,20 +242,18 @@
                                 <tbody>
                                     <tr th:each="ct : ${donHang.dsChiTietDonHang}">
                                         <td>
-        								<!-- SỬA: đổi 'mon' thành 'ct.monAn' và bỏ dấu "> thừa -->
-									        <img th:if="${ct.monAn.hinhAnh != null and ct.monAn.hinhAnh != ''}"
-									             th:src="@{${ct.monAn.hinhAnh}}"
-									             th:alt="${ct.monAn.tenMon}"
-									             class="product-img">
-									
-									        <img th:if="${ct.monAn.hinhAnh == null or ct.monAn.hinhAnh == ''}"
-									             th:src="@{/images/profiles/dish.png}"
-									             alt="Ảnh mặc định"
-									             class="product-img">
-									    </td>
+										    <img th:if="${ct.monAn.hinhAnh != null and ct.monAn.hinhAnh != ''}"
+										         th:src="@{'/images/food-img/' + ${ct.monAn.hinhAnh}}"
+										         th:alt="${ct.monAn.tenMon}"
+										         class="product-img">
+										
+										    <img th:if="${ct.monAn.hinhAnh == null or ct.monAn.hinhAnh == ''}"
+										         th:src="@{/images/profiles/dish.png}"
+										         alt="Ảnh mặc định"
+										         class="product-img">
+										</td>
                                         <td>
-                                            <div class="product-name" th:text="${ct.monAn.tenMon}">Tên món ăn</div>
-                                            <small class="text-muted" th:text="'Mã món: #' + ${ct.monAn.id}">#1</small>
+                                            <div class="product-name" th:text="${ct.monAn.tenMon}">Tên món ăn</div>                                    
                                         </td>
                                         <td class="text-center fw-bold fs-5" style="color: #495057;" th:text="${ct.quantity}">
                                             1
@@ -286,45 +284,61 @@
                         <h4 class="cart-header-title mb-4">Thông tin đặt hàng</h4>
                         
                         <form th:action="@{/dat-hang}" th:object="${donHang}" method="POST" class="form-custom">
-                            
-                            <div class="mb-3">
-                                <label for="soDienThoaiNhan" class="form-label fw-medium text-secondary">Số điện thoại nhận hàng <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control" id="soDienThoaiNhan" th:field="*{soDienThoaiNhan}" required placeholder="Nhập số điện thoại nhận...">
-                            </div>
-
-                            <div class="mb-3">
-    							<label for="diaChiGiaoHang" class="form-label fw-medium text-secondary">Địa chỉ giao hàng <span class="text-danger">*</span></label>
-    							<input type="text" class="form-control" id="diaChiGiaoHang" name="diaChiGiaoHang" 
-           						th:value="${session.userLogin != null ? session.userLogin.diaChi : ''}" 
-           						required placeholder="Nhập địa chỉ chi tiết (số nhà, tên đường, phường/xã)...">
-								</div>
-
-<div class="mb-4">
-    <label for="ghiChu" class="form-label fw-medium text-secondary">Ghi chú cho quán (Tùy chọn)</label>
-    <textarea class="form-control" id="ghiChu" th:field="*{ghiChu}" rows="2" 
-              placeholder="VD: Ít bánh phở, nhiều hành, không ăn cay..."></textarea>
-</div>
-
-                            <div class="summary-box mb-4">
-                                <div class="summary-title">Tóm tắt chi phí</div>
-                                <div class="summary-row">
-                                    <span>Tạm tính</span>
-                                    <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(donHang.tongGia, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
-                                </div>
-                                <div class="summary-row">
-                                    <span>Phí giao hàng</span>
-                                    <span class="text-success fw-bold">Miễn phí</span>
-                                </div>
-                                <div class="summary-total">
-                                    <span>Tổng thanh toán</span>
-                                    <span class="total-price" th:text="${#numbers.formatDecimal(donHang.tongGia, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn-checkout btn py-3 fs-5">
-                                <i class="fa-solid fa-circle-check me-2"></i> XÁC NHẬN ĐẶT HÀNG
-                            </button>
-                        </form>
+    
+						    <div class="mb-3">
+						        <label for="tenNguoiNhan" class="form-label fw-medium text-secondary">Tên người nhận <span class="text-danger">*</span></label>
+						        <input type="text" class="form-control" id="tenNguoiNhan" name="tenNguoiNhan" 
+						               th:value="${session.userLogin != null ? session.userLogin.tenKhach : ''}" 
+						               required placeholder="Nhập họ và tên người nhận...">
+						    </div>
+						
+						    <div class="mb-3">
+						        <label for="soDienThoaiNhan" class="form-label fw-medium text-secondary">Số điện thoại <span class="text-danger">*</span></label>
+						        <input type="tel" class="form-control" id="soDienThoaiNhan" name="soDienThoaiNhan" 
+						               th:value="${session.userLogin != null ? session.userLogin.sdt : ''}" 
+						               required placeholder="Nhập số điện thoại nhận...">
+						    </div>
+						
+						    <div class="mb-3">
+						        <label for="diaChiNhan" class="form-label fw-medium text-secondary">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+						        <input type="text" class="form-control" id="diaChiNhan" name="diaChiNhan" 
+						               th:value="${session.userLogin != null ? session.userLogin.diaChi : ''}" 
+						               required placeholder="Nhập địa chỉ chi tiết (số nhà, tên đường, phường/xã)...">
+						    </div>
+						
+						    <div class="mb-3">
+						        <label for="phuongThucThanhToan" class="form-label fw-medium text-secondary">Phương thức thanh toán <span class="text-danger">*</span></label>
+						        <select class="form-select" id="phuongThucThanhToan" name="phuongThucThanhToan" required>
+						            <option value="COD" selected>Thanh toán khi nhận hàng (COD)</option>
+						        </select>
+						    </div>
+						
+						    <div class="mb-4">
+						        <label for="ghiChu" class="form-label fw-medium text-secondary">Ghi chú cho quán (Tùy chọn)</label>
+						        <textarea class="form-control" id="ghiChu" th:field="*{ghiChu}" rows="2" 
+						                  placeholder="VD: Ít bánh phở, nhiều hành, không ăn cay..."></textarea>
+						    </div>
+						
+						    <div class="summary-box mb-4">
+						        <div class="summary-title">Tóm tắt chi phí</div>
+						        <div class="summary-row">
+						            <span>Tạm tính</span>
+						            <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(donHang.tongGia, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+						        </div>
+						        <div class="summary-row">
+						            <span>Phí giao hàng</span>
+						            <span class="text-success fw-bold">Miễn phí</span>
+						        </div>
+						        <div class="summary-total">
+						            <span>Tổng thanh toán</span>
+						            <span class="total-price" th:text="${#numbers.formatDecimal(donHang.tongGia, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+						        </div>
+						    </div>
+						
+						    <button type="submit" class="btn-checkout btn py-3 fs-5">
+						        <i class="fa-solid fa-circle-check me-2"></i> XÁC NHẬN ĐẶT HÀNG
+						    </button>
+						</form>
                     </div>
                 </div>
 
