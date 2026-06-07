@@ -1,4 +1,4 @@
-Link Demo: []
+Link Demo: [(https://youtu.be/t1Z4eovDqH4)]
 ---
 ## 1. Mô tả ứng dụng
 Ứng dụng **PhoMuoi (Phở Mười)** là nền tảng website đặt đồ ăn trực tuyến (Food Order) được thiết kế dành riêng cho các nhà hàng, quán ăn. Hệ thống cung cấp một quy trình mua hàng mượt mà cho thực khách: từ việc khám phá thực đơn, thêm món vào giỏ hàng cho đến bước thanh toán và theo dõi lịch sử giao dịch. Đồng thời, dự án tích hợp một trang Quản trị (Admin Dashboard) toàn diện, giúp chủ quán dễ dàng kiểm soát menu, xử lý đơn hàng và quản lý tệp khách hàng, từ đó tối ưu hóa quy trình kinh doanh.
