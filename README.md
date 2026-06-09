@@ -128,6 +128,7 @@ src/
 │   │           ├── controllers/                 # Tiếp nhận request từ người dùng và điều hướng giao diện
 │   │           │   ├── AdminController.java     # Xử lý đăng nhập, đăng ký và các chức năng quản trị
 │   │           │   ├── HomeController.java      # Xử lý trang chủ, danh sách món ăn, quảng cáo và đơn hàng
+│   │           │   ├── ChatBotController.java   # Xử lý chatbot theo kịch bản.
 │   │           │   └── RController.java         # Cung cấp dữ liệu động (AJAX/API) cho giao diện
 │   │           │
 │   │           ├── models/                      # Các Entity ánh xạ với bảng trong cơ sở dữ liệu
