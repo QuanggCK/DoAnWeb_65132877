@@ -100,6 +100,214 @@
             border: 1.5px solid #121ba6; color: #121ba6;
             text-decoration: none; font-weight: 600; font-size: 14px;
         }
+
+        /* ==================== CẤU HÌNH CSS CHATBOT TOÀN DIỆN ==================== */
+        /* 1. Nút kích hoạt Chatbot nổi phía trên */
+        .chatbot-launcher {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #121ba6, #1a237e);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(18, 27, 166, 0.4);
+            cursor: pointer;
+            z-index: 99999;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .chatbot-launcher:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(18, 27, 166, 0.6);
+        }
+
+        /* Hiệu ứng sóng tròn lan tỏa xung quanh icon */
+        .chatbot-launcher::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #121ba6;
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.4;
+            animation: chatbot-pulse 2s infinite;
+        }
+
+        @keyframes chatbot-pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        /* 2. Cửa sổ Khung hiển thị chat */
+        .chatbot-box {
+            position: fixed;
+            bottom: 105px;
+            right: 30px;
+            width: 360px;
+            height: 500px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Thêm class active qua JS để hiện khung chat mượt mà */
+        .chatbot-box.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        /* Header của Khung Chat */
+        .chat-header {
+            background: linear-gradient(135deg, #121ba6, #1a237e);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-avatar-status {
+            position: relative;
+            width: 35px; height: 35px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .status-dot {
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 10px; height: 10px;
+            background: #22c55e;
+            border: 2px solid #121ba6;
+            border-radius: 50%;
+        }
+        .chat-close-btn {
+            background: none; border: none;
+            color: white; font-size: 18px;
+            cursor: pointer; opacity: 0.8; transition: opacity 0.2s;
+        }
+        .chat-close-btn:hover { opacity: 1; }
+
+        /* Vùng nội dung chứa tin nhắn */
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            background: #f8fafc;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .msg-row {
+            display: flex;
+            max-width: 85%;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        /* Tin nhắn phía Bot bên trái */
+        .bot-row {
+            align-self: flex-start;
+        }
+        .msg-avatar {
+            width: 28px; height: 28px;
+            background: #e2e8f0; color: #121ba6;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; flex-shrink: 0;
+        }
+        .bot-row .msg-bubble {
+            background: white;
+            color: #334155;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            border: 1px solid #e2e8f0;
+        }
+        /* Tin nhắn phía Khách bên phải */
+        .user-row {
+            align-self: flex-end;
+            justify-content: flex-end;
+        }
+        .user-row .msg-bubble {
+            background: #121ba6;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .msg-bubble {
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        /* Ô nhập thông tin chát ở chân khung */
+        .chat-input-area {
+            padding: 12px 15px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .chat-input-area input {
+            flex-grow: 1;
+            border: 1px solid #cbd5e1;
+            padding: 9px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            outline: none;
+            font-family: 'Montserrat', sans-serif;
+            transition: border-color 0.2s;
+        }
+        .chat-input-area input:focus {
+            border-color: #121ba6;
+        }
+        .chat-input-area button {
+            background: #121ba6;
+            color: white; border: none;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.2s, transform 0.1s;
+        }
+        .chat-input-area button:hover {
+            background: #1a237e;
+        }
+        .chat-input-area button:active {
+            transform: scale(0.95);
+        }
+        
+        /* Hiệu ứng bong bóng ba chấm nhấp nháy */
+        .typing-indicator {
+            display: flex; gap: 4px; padding: 4px 8px;
+        }
+        .typing-indicator span {
+            width: 6px; height: 6px; background: #94a3b8;
+            border-radius: 50%; animation: blink 1.4s infinite both;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: .2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: .4s; }
+        @keyframes blink {
+            0% { opacity: .2; }
+            20% { opacity: 1; }
+            100% { opacity: .2; }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -108,12 +316,10 @@
 
     <div class="d-flex flex-grow-1">
 
-        <!-- SIDEBAR -->
         <div style="width: 220px; flex-shrink: 0;">
             <div th:replace="~{fragments/side-bar :: sideBarMain}"></div>
         </div>
 
-        <!-- NỘI DUNG CHÍNH -->
         <div class="flex-grow-1 p-4">
 
             <h2 style="font-size:20px; font-weight:700; color:#1a237e; margin-bottom:20px; border-bottom:2px solid #e9ecef; padding-bottom:10px;">
@@ -125,7 +331,6 @@
 		            <th:block th:each="dm : ${dsDanhMuc}" th:if="${dm.id == activeDanhMucId}" th:text="${dm.tenDanhMuc}"></th:block>
 		        </span>
 		    </h2>
-            <!-- DANH SÁCH MÓN ĂN -->
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4"
                  th:if="${dsMonAn != null and not #lists.isEmpty(dsMonAn)}">
 
@@ -168,16 +373,12 @@
                 </div>
 
             </div>
-            <!-- END DANH SÁCH -->
-
-            <!-- TRỐNG -->
             <div th:if="${dsMonAn == null or #lists.isEmpty(dsMonAn)}"
                  style="text-align:center; padding:80px 20px; color:#adb5bd;">
                 <i class="fa-solid fa-plate-wheat" style="font-size:60px; margin-bottom:16px; display:block;"></i>
                 <p style="font-size:16px; font-weight:500;">Chưa có món ăn nào để hiển thị.</p>
             </div>
 
-            <!-- PAGINATION -->
             <div th:if="${totalPages != null and totalPages > 1}"
                  style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:30px; flex-wrap:wrap;">
 
@@ -193,19 +394,167 @@
                     </a>
                 </th:block>
 
-                <a th:if="${currentPage < totalPages - 1}"
-                   th:href="@{/(page=${currentPage + 1})}"
-                   class="page-btn-nav">Sau &raquo;</a>
+                <th:block th:if="${currentPage < totalPages - 1}">
+                    <a th:href="@{/(page=${currentPage + 1})}"
+                       class="page-btn-nav">Sau &raquo;</a>
+                </th:block>
 
             </div>
 
         </div>
-        <!-- END NỘI DUNG CHÍNH -->
+        </div>
 
+    <div class="chatbot-launcher" id="chatbotBtn" onclick="toggleChatbox()">
+        <i class="fa-solid fa-robot" id="chatIcon"></i>
+    </div>
+
+    <div class="chatbot-box" id="chatbotBox">
+        <div class="chat-header">
+            <div class="d-flex align-items-center gap-2">
+                <div class="chat-avatar-status">
+                    <i class="fa-solid fa-robot"></i>
+                    <span class="status-dot"></span>
+                </div>
+                <div>
+                    <h6 class="m-0 fw-bold" style="font-size: 14px; color: #ffffff;">Trợ Lý Ảo PhoMuoi</h6>
+                    <small style="font-size: 11px; opacity: 0.8; color: #ffffff; display: block;">Luôn sẵn sàng hỗ trợ</small>
+                </div>
+            </div>
+            <button class="chat-close-btn" onclick="toggleChatbox()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg-row bot-row">
+                <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="msg-bubble">
+                    Chào bạn! Rất vui được gặp bạn, mình là Trợ lý ảo của quán <b>Phở Mười</b>. Bạn cần mình hỗ trợ xem thực đơn hay đặt bàn không ạ? 🍲
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Nhập câu hỏi tại đây..." onkeypress="handleKeyPress(event)">
+            <button id="sendChatBtn" onclick="sendMessage()">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
     </div>
 
     <div th:replace="~{fragments/footer :: footerMain}"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Hàm đóng/mở Khung chat bằng việc thêm/bớt class 'active'
+        function toggleChatbox() {
+            const chatbox = document.getElementById("chatbotBox");
+            const icon = document.getElementById("chatIcon");
+            
+            chatbox.classList.toggle("active");
+            
+            if(chatbox.classList.contains("active")) {
+                icon.className = "fa-solid fa-comments"; // Đổi sang icon chat khi mở
+                setTimeout(() => document.getElementById("chatInput").focus(), 300);
+            } else {
+                icon.className = "fa-solid fa-robot";    // Trả về icon robot ban đầu
+            }
+        }
+
+        // Bắt sự kiện khi người dùng nhấn phím Enter lúc gõ chữ
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+     // Hàm xử lý gửi tin nhắn từ Khách sang Server và chờ Bot phản hồi từ Database
+        function sendMessage() {
+            const inputElement = document.getElementById("chatInput");
+            const messageText = inputElement.value.trim();
+            
+            if (messageText === "") return; // Không xử lý tin nhắn trống
+
+            const chatMessages = document.getElementById("chatMessages");
+
+            // 1. Hiển thị tin nhắn của Khách (User) lên khung giao diện chat công khai
+            const userRow = document.createElement("div");
+            userRow.className = "msg-row user-row";
+            userRow.innerHTML = `<div class="msg-bubble">${escapeHTML(messageText)}</div>`;
+            chatMessages.appendChild(userRow);
+
+            // Xóa trống ô nhập dữ liệu và cuộn hộp chat
+            inputElement.value = "";
+            scrollToBottom();
+
+            // 2. Chèn hiệu ứng ba chấm nhấp nháy tạm thời báo hiệu "Bot đang truy vấn..."
+            const typingRow = document.createElement("div");
+            typingRow.className = "msg-row bot-row";
+            typingRow.id = "botTyping";
+            typingRow.innerHTML = `
+                <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="msg-bubble">
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                </div>
+            `;
+            chatMessages.appendChild(typingRow);
+            scrollToBottom();
+
+            // 3. ĐẨY DỮ LIỆU LÊN SERVER XỬ LÝ (KẾT NỐI DATABASE)
+            fetch('/api/chatbot/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: messageText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Xóa bỏ hiệu ứng ba chấm đang gõ sau khi nhận được phản hồi
+                const typingIndicator = document.getElementById("botTyping");
+                if (typingIndicator) typingIndicator.remove();
+
+                // Chèn câu trả lời lấy trực tiếp từ Database lên khung chat
+                const botRow = document.createElement("div");
+                botRow.className = "msg-row bot-row";
+                botRow.innerHTML = `
+                    <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="msg-bubble">${data.reply}</div>
+                `;
+                chatMessages.appendChild(botRow);
+                scrollToBottom();
+            })
+            .catch(error => {
+                console.error('Lỗi kết nối Chatbot:', error);
+                // Xử lý xóa hiệu ứng gõ nếu mất mạng hoặc lỗi Server (500)
+                const typingIndicator = document.getElementById("botTyping");
+                if (typingIndicator) typingIndicator.remove();
+                
+                // Thông báo lỗi thân thiện cho khách
+                const errorRow = document.createElement("div");
+                errorRow.className = "msg-row bot-row";
+                errorRow.innerHTML = `
+                    <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="msg-bubble" style="color: #ef4444;">Dạ, hệ thống máy chủ tổng đang bận nâng cấp cơ sở dữ liệu. Bạn vui lòng thử lại sau vài giây nhé!</div>
+                `;
+                chatMessages.appendChild(errorRow);
+                scrollToBottom();
+            });
+        }
+
+        // Cuộn hộp hội thoại xuống dòng tin mới nhất
+        function scrollToBottom() {
+            const chatMessages = document.getElementById("chatMessages");
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Phòng chống mã độc XSS khi chèn chữ của người dùng nhập vào HTML
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
 </body>
 </html>

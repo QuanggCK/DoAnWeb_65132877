@@ -190,7 +190,7 @@
 
       tbody.innerHTML = users.map(u => {
         const id = u.id || u.userId;
-        const name = u.hoTen || u.username || 'Chưa đặt tên';
+        const name = u.tenKhach || u.username || 'Chưa đặt tên';
         const phone = u.sdt || 'Chưa cập nhật';
         const role = (u.roleAdmin === true || u.role === 'ADMIN') ? 'ADMIN' : 'USER';
         
@@ -231,7 +231,7 @@
       const roleFilter = document.getElementById('sel-role').value;
 
       const filtered = localUsersList.filter(u => {
-        const name = (u.hoTen || u.username || '').toLowerCase();
+        const name = (u.tenKhach || u.username || '').toLowerCase();
         const phone = (u.sdt || '').toLowerCase();
         const role = (u.roleAdmin === true || u.role === 'ADMIN') ? 'ADMIN' : 'USER';
 
@@ -248,7 +248,7 @@
       const u = localUsersList.find(x => (x.id === id || x.userId === id));
       if (!u) return;
 
-      const name = u.hoTen || u.username || 'Chưa cập nhật';
+      const name = u.tenKhach || u.username || 'Chưa cập nhật';
       const address = u.diaChi || 'Chưa có thông tin địa chỉ giao hàng';
       const phone = u.sdt || 'Chưa cập nhật số điện thoại';
       const role = (u.roleAdmin === true || u.role === 'ADMIN') ? 'ADMIN' : 'USER';
